@@ -18,26 +18,24 @@ Pull request for #PULL_REQUEST_ID
  - No deprecated functions in the code
  - “Dead Code” should be removed. If it is a temporary hack, it should be identified as such.
  - All code follows coding standard (preferably https://github.com/airbnb/javascript)
- - No magic numbers. There should be no magic numbers like 6,10 etc… any numbers like this should be defined as a constant. And Constants should be well commented about the purpose.
+ - No magic numbers. All numbers (that has no clear origin should be defined as a variable).
  
 - [ ] Above criteria met
 
 ## Documentation
  - All methods are commented in clear language. If it is unclear to the reader, it is unclear to the user.
- - All class, variable, and method modifiers should be examined for correctness.
- - Describe behaviour for known input corner-cases.
- - Complex algorithms should be explained with references. For example,  document the reference that identifies the equation, formula, or pattern. In all cases, examine the algorithm and determine if it can be simplified.
- - Incomplete code is marked with `//TODO` or `//FIXME` markers.
+ - All class, variable, and method modifiers should be examined for correct spelling.
+ - Describe purpose for known input corner-cases.
+ - Incomplete code is should never be merged.
  - All public and private APIs are examined for updates.
 
 - [ ] Above criteria met
 
 ## Unit Tests
- - Unit tests are added for each code path, and behaviour.
+ - Unit tests should be added as much as possible.
  - Unit tests must cover error conditions and invalid parameter cases.
- - Unit tests for standard algorithms should be examined against the standard for expected results.
  - Ensure that the code fixes the issue, or implements the requirement, and that the unit test confirms it. If the unit test confirms a fix for issue, add the issue number to the doc block.
- - Unit tests must have assertions
+ - Unit tests must have assertions.
  - Regression tests for fixes are included.
  - As a reviewer, you should understand the code. If you don’t, the review may not be complete, or the code may not be well commented.
 
@@ -53,4 +51,3 @@ Pull request for #PULL_REQUEST_ID
 
 - [ ] All unit tests pass
 - [ ] All acceptance criteria are met and working as expected
-- [ ] Spot checks have been performed on existing functionality that may have been affected
