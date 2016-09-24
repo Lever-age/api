@@ -9,7 +9,6 @@ var config = {
       name: 'leverage'
     },
     port: process.env.PORT || 3000,
-    db: 'mongodb://localhost/leverage-development'
   },
 
   test: {
@@ -18,7 +17,6 @@ var config = {
       name: 'leverage'
     },
     port: process.env.PORT || 3000,
-    db: 'mongodb://localhost/leverage-test'
   },
 
   production: {
@@ -27,7 +25,6 @@ var config = {
       name: 'leverage'
     },
     port: process.env.PORT || 3000,
-    db: 'mongodb://localhost/leverage-production'
   }
 };
 
