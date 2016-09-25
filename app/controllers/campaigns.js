@@ -20,6 +20,7 @@ router.get('/', function(req, res){
     }catch(e){
         console.log(e);
         console.log(e.stack);
+        res.json({error: "There has been an error."})
     }
 });
 
