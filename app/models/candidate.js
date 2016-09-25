@@ -1,7 +1,8 @@
 var Promise = require('bluebird'),
         sqlite = require('sqlite3').verbose(),
         path = require('path'),
-        db = new sqlite.Database(__dirname + '/leverage.sqlite');
+        db = new sqlite.Database(__dirname + '/leverage.sqlite'),
+        Candidate = require('../objects/candidate');
         
 module.exports = function Candidate(){
 
