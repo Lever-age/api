@@ -15,7 +15,10 @@ var express = require('express'),
       try{
         var campaignInfo = new CampaignInfo();
         campaignInfo.getAll(function(err, data){
-            console.log(err);
+            if(err){
+                console.log(err);
+                res.json({error: "There was an error"});
+            }
             res.json(data);
         });
 

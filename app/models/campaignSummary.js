@@ -1,6 +1,6 @@
 var Promise = require('bluebird'),
         sqlite = require('sqlite3').verbose(),
-        db = new sqlite.Database('./leverage.sqlite');
+        db = new sqlite.Database(__dirname + '/leverage.sqlite');
 
 module.exports = function CampaignSummary(){
 
