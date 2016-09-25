@@ -1,11 +1,11 @@
+var Promise = require('bluebird'),
+        sqlite = require('sqlite3').verbose(),
+        db = new sqlite.Database('./leverage.sqlite');
+
 module.exports = function Candidate(){
 
-    var Sequelize = require('sequelize');
-    var sequelize = new Sequelize('/srv/leverage/leverage.sqlite', 'u', 'p');
-
-    var Candidate = sequelize.define('candidate', {
-        candidate_id: Sequelize.INTEGER,
-        candidate_name: Sequelize.TEXT
-    });
+    this.getAll = function getAllCandidateInfo(cb){
+        return db.all('SELECT * FROM campaign_info', cb);
+    }
 
 }

@@ -11,8 +11,18 @@ var express = require('express'),
   }
 
   //We're gonna return a list of all users'
-  router.get('/', function(req, res){
-      res.end("Respond with a resource yo");
+  router.get('/', function(req, res){    
+      try{
+        var campaignInfo = new CampaignInfo();
+        campaignInfo.getAll(function(err, data){
+            console.log(err);
+            res.json(data);
+        });
+
+      }catch(e){
+          console.log(e);
+          console.log(e.stack);
+      }
   });
 
   //We send the ID

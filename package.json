@@ -15,8 +15,10 @@
     "method-override": "^2.3.0",
     "mongoose": "^4.1.2",
     "morgan": "^1.6.1",
-    "sequelize": "^3.24.3",
-    "serve-favicon": "^2.3.0"
+    "mysql": "^2.11.1",
+    "serve-favicon": "^2.3.0",
+    "sqlite": "^2.2.0",
+    "sqlite3": "^3.1.4"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
