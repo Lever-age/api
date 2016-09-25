@@ -1,9 +1,8 @@
 var express = require('express'),
   router = express.Router(),
   path = require('path'),
-  CampaignInfo = require('../models/campaignInfo'),
-  Candidate = require('../models/candidate'),
-  CampaignSummary = require('../models/campaignSummary');
+  CampaignInfo = require('../models/campaign'),
+  Candidate = require('../models/candidate');
   
   //Do this so that the app can access this file. 
   module.exports = function(app){
