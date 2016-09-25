@@ -12,20 +12,8 @@ var express = require('express'),
 
   //We're gonna return a list of all users'
   router.get('/', function(req, res){    
-      try{
-        var campaignInfo = new CampaignInfo();
-        campaignInfo.getAll(function(err, data){
-            if(err){
-                console.log(err);
-                res.json({error: "There was an error"});
-            }
-            res.json(data);
-        });
-
-      }catch(e){
-          console.log(e);
-          console.log(e.stack);
-      }
+      res.json({"x": "y"});
+      res.end();
   });
 
   //We send the ID
