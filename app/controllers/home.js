@@ -1,8 +1,5 @@
 var express = require('express'),
-  router = express.Router(),
-  path = require('path'),
-  mongoose = require('mongoose');
-
+  router = express.Router();
 
 module.exports = function (app) {
   app.use('/', router);
