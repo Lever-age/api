@@ -1,6 +1,5 @@
 var express = require('express'),
-  router = express.Router(),
-  path = require('path');
+  router = express.Router();
 
 module.exports = function (app) {
   app.use('/', router);
@@ -9,4 +8,3 @@ module.exports = function (app) {
 router.get('/', function (req, res, next) {
   res.sendFile(path.dirname(require.main.filename) + "/index.html");
 });
-

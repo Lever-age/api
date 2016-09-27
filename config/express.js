@@ -1,6 +1,7 @@
 var express = require('express');
 var glob = require('glob');
 
+
 module.exports = function(app, config) {
   var env = process.env.NODE_ENV || 'development';
   app.locals.ENV = env;
@@ -30,7 +31,7 @@ module.exports = function(app, config) {
 
   app.use(function (err, req, res, next) {
     res.status(err.status || 500);
-      res.render('error', {
+      res.json({
         message: err.message,
         error: {},
         title: 'error'
