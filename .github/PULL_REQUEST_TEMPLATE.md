@@ -17,7 +17,7 @@ Pull request for #PULL_REQUEST_ID
  - No syntax/runtime errors and warnings in the code
  - No deprecated functions in the code
  - “Dead Code” should be removed. If it is a temporary hack, it should be identified as such.
- - All code follows coding standard (preferably https://github.com/airbnb/javascript)
+ - All code follows coding standard (ESLint - http://eslint.org/docs/rules/)
  - No magic numbers. All numbers (that has no clear origin should be defined as a variable).
  
 - [ ] Above criteria met
