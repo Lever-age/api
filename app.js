@@ -20,8 +20,6 @@ var app = express();
 var config = JSON.parse(fs.readFileSync('config.json'));
 var extern = { logger: winston };
 
-extern.logger = winston;
-
 /* Endpoints */
 
 app.get('/campaigns/:id/info', function (req, res) {
