@@ -1,9 +1,9 @@
 'use strict';
 
-var expect             = require('chai').expect;
-var campaigninfo_by_id = require('../controllers/campaigns').campaigninfo_by_id;
+var expect           = require('chai').expect;
+var campaigninfoById = require('../controllers/campaigns').campaigninfoById;
 
-describe('campaigninfo_by_id', function(){
+describe('campaigninfoById', function(){
   var req = {
     params: {}
   };
@@ -17,7 +17,7 @@ describe('campaigninfo_by_id', function(){
         done();
       }
     };
-    campaigninfo_by_id({backend: backend}, req, res);
+    campaigninfoById({backend: backend}, req, res);
   });
   it('logs and sends error response', function(done){
     var backend = {
@@ -26,7 +26,7 @@ describe('campaigninfo_by_id', function(){
     var logger = {
       log: function(level, format, name, message){
         expect(level, 'incorrect log level specified').to.equal('error');
-        expect(format, 'unexpected format string').to.equal('campaigninfo_by_id: %s: %s');
+        expect(format, 'unexpected format string').to.equal('campaigninfoById: %s: %s');
         expect(name, 'unexpected error name').to.equal('test error');
         expect(message, 'unexpected error message').to.equal('error content');
       }
@@ -37,6 +37,6 @@ describe('campaigninfo_by_id', function(){
         done();
       }
     };
-    campaigninfo_by_id({backend: backend, logger: logger}, req, res);
+    campaigninfoById({backend: backend, logger: logger}, req, res);
   });
 });

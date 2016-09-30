@@ -13,10 +13,10 @@
  * @param {Object} req
  * @param {Object} res
  */
-module.exports.campaigninfo_by_id = function (extern, req, res) {
+module.exports.campaigninfoById = function (extern, req, res) {
   extern.backend.fetch_by_id(req.params.id, function (err, ci) {
     if (err) {
-      extern.logger.log('error', 'campaigninfo_by_id: %s: %s', err.name, err.message);
+      extern.logger.log('error', 'campaigninfoById: %s: %s', err.name, err.message);
       return res.sendStatus(500);
     }
     res.json(ci);

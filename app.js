@@ -12,7 +12,7 @@ var CampaignInfoStorage = require('./lib/storage/sqlite/campaign-info-storage');
 
 /* Controllers */
 
-var campaigninfoById = require('./controllers/campaigns').campaigninfo_by_id;
+var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
 
 /* App variables */
 
