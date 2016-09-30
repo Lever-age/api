@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - node
+before_install:
+  - npm run test-data
+branches:
+  only:
+    - develop
+    - master
