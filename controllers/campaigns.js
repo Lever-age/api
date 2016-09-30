@@ -22,3 +22,23 @@ module.exports.campaigninfoById = function (extern, req, res) {
     res.json(ci);
   });
 };
+
+/**
+ * Return a candidate info
+ * object for the candidate
+ * associated with the campaign
+ * of the specified id
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.candidateinfoByCampaign = function (extern, req, res) {
+  extern.backend.fetch_by_campaign(req.params.id, function (err, ci) {
+    if (err) {
+      extern.logger.log('error', 'candidateinfoByCampaign: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(ci);
+  });
+};
