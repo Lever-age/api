@@ -31,6 +31,6 @@ app.get('/campaigns/:id/info', function (req, res) {
 
 /* Initialize */
 
-app.listen(config.bind.port, config.bind.address, function () {
-  extern.logger.log('info', 'API listening on port %d', config.bind.port);
+app.listen(config.listen.port, config.listen.address, function () {
+  extern.logger.log('info', 'API listening on port %d', config.listen.port);
 });
