@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "eslint app lib && mocha -R spec",
+    "test": "eslint app.js controllers lib && mocha -R spec",
     "test-data": "rm -f test/data/db.sqlite; sqlite3 test/data/db.sqlite < test/data/records.sql"
   },
   "dependencies": {
