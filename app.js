@@ -9,10 +9,12 @@ var winston = require('winston');
 /* Library modules */
 
 var CampaignInfoStorage = require('./lib/storage/sqlite/campaign-info-storage');
+var CandidateInfoStorage = require('./lib/storage/sqlite/candidate-info-storage');
 
 /* Controllers */
 
 var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
+var candidateinfoByCampaign = require('./controllers/campaigns').candidateinfoByCampaign;
 
 /* App variables */
 
@@ -25,6 +27,11 @@ var extern = { logger: winston };
 app.get('/campaigns/:id/info', function (req, res) {
   extern.backend = new CampaignInfoStorage(config.storage);
   campaigninfoById(extern, req, res);
+});
+
+app.get('/campaigns/:id/candidate', function (req, res) {
+  extern.backend = new CandidateInfoStorage(config.storage);
+  candidateinfoByCampaign(extern, req, res);
 });
 
 /* Initialize */
