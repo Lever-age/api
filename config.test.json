@@ -1,0 +1,8 @@
+{
+ "listen": {
+   "port": 4180
+ },
+ "storage": {
+   "path": "test/data/db.sqlite"
+ }
+}
