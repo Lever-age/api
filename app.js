@@ -10,11 +10,13 @@ var winston = require('winston');
 
 var CampaignInfoStorage = require('./lib/storage/sqlite/campaign-info-storage');
 var CandidateInfoStorage = require('./lib/storage/sqlite/candidate-info-storage');
+var CandidateStorage = require('./lib/storage/sqlite/candidates');
 
 /* Controllers */
 
 var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
 var candidateinfoByCampaign = require('./controllers/campaigns').candidateinfoByCampaign;
+var candidatesList = require('./controllers/candidates').candidatesList;
 
 /* App variables */
 
@@ -34,8 +36,15 @@ app.get('/campaigns/:id/candidate', function (req, res) {
   candidateinfoByCampaign(extern, req, res);
 });
 
+app.get('/candidates', (req, res) => {
+  extern.backend = new CandidateStorage(config.storage);
+  candidatesList(extern, req, res);
+});
+
 /* Initialize */
 
 app.listen(config.listen.port, config.listen.address, function () {
   extern.logger.log('info', 'API listening on port %d', config.listen.port);
 });
+
+module.exports = app;
