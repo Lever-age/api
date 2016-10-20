@@ -3,28 +3,28 @@
 var expect           = require('chai').expect;
 var campaigninfoById = require('../controllers/campaigns').campaigninfoById;
 
-describe('campaigninfoById', function(){
+describe('campaigninfoById', () => {
   var req = {
     params: {}
   };
-  it('sends the retrieved object as a response', function(done){
+  it('sends the retrieved object as a response', (done) => {
     var backend = {
-      fetch_by_id: function(id, cb){ cb(undefined, 'response content'); }
+      fetch_by_id: (id, cb) => cb(undefined, 'response content')
     };
     var res = {
-      json: function(content){
+      json: (content) => {
         expect(content, 'unexpected response content').to.equal('response content');
         done();
       }
     };
     campaigninfoById({backend: backend}, req, res);
   });
-  it('logs and sends error response', function(done){
+  it('logs and sends error response', (done) => {
     var backend = {
-      fetch_by_id: function(id, cb){ cb({name: 'test error', message: 'error content'}); }
+      fetch_by_id: (id, cb) => cb({name: 'test error', message: 'error content'})
     };
     var logger = {
-      log: function(level, format, name, message){
+      log: (level, format, name, message) => {
         expect(level, 'incorrect log level specified').to.equal('error');
         expect(format, 'unexpected format string').to.equal('campaigninfoById: %s: %s');
         expect(name, 'unexpected error name').to.equal('test error');
@@ -32,7 +32,7 @@ describe('campaigninfoById', function(){
       }
     };
     var res = {
-      sendStatus: function(rcode){
+      sendStatus: (rcode) => {
         expect(rcode, 'Unexpected response code').to.equal(500);
         done();
       }
