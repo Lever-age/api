@@ -15,6 +15,7 @@ var CandidateInfoStorage = require('./lib/storage/sqlite/candidate-info-storage'
 
 var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
 var candidateinfoByCampaign = require('./controllers/campaigns').candidateinfoByCampaign;
+var campaignInfo = require('./controllers/campaigns').campaignInfo;
 
 /* App variables */
 
@@ -32,6 +33,11 @@ app.get('/campaigns/:id/info', function (req, res) {
 app.get('/campaigns/:id/candidate', function (req, res) {
   extern.backend = new CandidateInfoStorage(config.storage);
   candidateinfoByCampaign(extern, req, res);
+});
+
+app.get('/campaigns/info', function (req, res) {
+  extern.backend = new CampaignInfoStorage(config.storage);
+  campaignInfo(extern, req, res);
 });
 
 /* Initialize */
