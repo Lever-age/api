@@ -9,7 +9,7 @@ describe('campaigninfoById', () => {
   };
   it('sends the retrieved object as a response', (done) => {
     var backend = {
-      fetchById: (id, cb) => cb(undefined, 'response content')
+      fetch_by_id: (id, cb) => cb(undefined, 'response content')
     };
     var res = {
       json: (content) => {
@@ -21,7 +21,7 @@ describe('campaigninfoById', () => {
   });
   it('logs and sends error response', (done) => {
     var backend = {
-      fetchById: (id, cb) => cb({name: 'test error', message: 'error content'})
+      fetch_by_id: (id, cb) => cb({name: 'test error', message: 'error content'})
     };
     var logger = {
       log: (level, format, name, message) => {
