@@ -7,9 +7,9 @@ describe('CampaignInfoStorage', () => {
 
   var storage = new CampaignInfoStorage({ path: 'test/data/db.sqlite' });
 
-  describe('#fetch_by_id', () => {
+  describe('#fetchById', () => {
     it('retrieves the expected record', (done) => {
-      storage.fetch_by_id(1, (err, cinfo) => {
+      storage.fetchById(1, (err, cinfo) => {
         if (err) return done(err);
         expect(cinfo.campaign_id, 'unexpected campaign_id').to.equal(1);
         expect(cinfo.election_year, 'unexpected election_year').to.equal(2015);

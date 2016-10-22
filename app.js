@@ -45,3 +45,5 @@ app.get('/campaigns/info', function (req, res) {
 app.listen(config.listen.port, config.listen.address, function () {
   extern.logger.log('info', 'API listening on port %d', config.listen.port);
 });
+
+module.exports = app;
