@@ -62,13 +62,3 @@ module.exports.campaignInfo = function (extern, req, res) {
     res.json(ci);
   });
 };
-
-module.exports.campaignInfoByCandidate = function (extern, req, res) {
-  extern.backend.fetchByCampaign(req.params.id, function (err, ci) {
-    if (err) {
-      extern.logger.log('error', 'campaignInfoByCandidate: %s: %s', err.name, err.message);
-      return res.sendStatus(500);
-    }
-    res.json(ci);
-  });
-};

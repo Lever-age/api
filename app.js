@@ -16,7 +16,7 @@ var CandidateInfoStorage = require('./lib/storage/sqlite/candidate-info-storage'
 var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
 var candidateinfoByCampaign = require('./controllers/campaigns').candidateinfoByCampaign;
 var campaignInfo = require('./controllers/campaigns').campaignInfo;
-var campaignInfoByCandidate = require('./controllers/campaigns').campaignInfoByCandidate;
+var campaignInfoByCandidate = require('./controllers/candidates').campaignInfoByCandidate;
 
 /* App variables */
 
