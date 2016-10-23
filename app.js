@@ -41,7 +41,7 @@ app.get('/campaigns/info', function (req, res) {
   campaignInfo(extern, req, res);
 });
 
-app.get('/candidates/:id/campaigns', function (req, res) {
+app.get('/candidates/:id/campaigns/info', function (req, res) {
   extern.backend = new CampaignInfoStorage(config.storage);
   campaignInfoByCandidate(extern, req, res);
 });
