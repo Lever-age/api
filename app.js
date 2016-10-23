@@ -10,6 +10,7 @@ var winston = require('winston');
 
 var CampaignInfoStorage = require('./lib/storage/sqlite/campaign-info-storage');
 var CandidateInfoStorage = require('./lib/storage/sqlite/candidate-info-storage');
+var CandidateStorage = require('./lib/storage/sqlite/candidate-storage');
 
 /* Controllers */
 
@@ -17,6 +18,7 @@ var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
 var candidateinfoByCampaign = require('./controllers/campaigns').candidateinfoByCampaign;
 var campaignInfo = require('./controllers/campaigns').campaignInfo;
 var campaignInfoByCandidate = require('./controllers/candidates').campaignInfoByCandidate;
+var candidateById = require('./controllers/candidates').candidateById;
 
 /* App variables */
 
@@ -44,6 +46,11 @@ app.get('/campaigns/info', function (req, res) {
 app.get('/candidates/:id/campaigns/info', function (req, res) {
   extern.backend = new CampaignInfoStorage(config.storage);
   campaignInfoByCandidate(extern, req, res);
+});
+
+app.get('/candidates/:id', function (req, res) {
+  extern.backend = new CandidateStorage(config.storage);
+  candidateById(extern, req, res);
 });
 
 /* Initialize */
