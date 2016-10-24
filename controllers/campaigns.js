@@ -45,6 +45,9 @@ module.exports.candidateinfoByCampaign = function (extern, req, res) {
 
 /**
  * Return all campaigns info objects
+ * object for the candidate
+ * associated with the campaign
+ * of the specified id
  *
  * @param {Object} extern
  * @param {Object} req
@@ -57,5 +60,42 @@ module.exports.campaignInfo = function (extern, req, res) {
       return res.sendStatus(500);
     }
     res.json(ci);
+  });
+};
+
+/**
+ * Return an array of all
+ * campaign summary objects
+ * associated with the campaign
+ * of the specified id
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.campaignsummaryById = function (extern, req, res) {
+  extern.backend.fetchById(req.params.id, function (err, summaries) {
+    if (err) {
+      extern.logger.log('error', 'campaignsummaryById: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(summaries);
+  });
+};
+
+/**
+ * Return the campaign of the specified id
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.campaignById = function (extern, req, res) {
+  extern.backend.fetchById(req.params.id, function (err, cmp) {
+    if (err) {
+      extern.logger.log('error', 'campaignById: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(cmp);
   });
 };
