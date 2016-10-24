@@ -82,3 +82,20 @@ module.exports.campaignsummaryById = function (extern, req, res) {
     res.json(summaries);
   });
 };
+
+/**
+ * Return the campaign of the specified id
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.campaignById = function (extern, req, res) {
+  extern.backend.fetchById(req.params.id, function (err, cmp) {
+    if (err) {
+      extern.logger.log('error', 'campaignById: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(cmp);
+  });
+};
