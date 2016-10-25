@@ -99,3 +99,20 @@ module.exports.campaignById = function (extern, req, res) {
     res.json(cmp);
   });
 };
+
+/**
+ * Return all campaign objects
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.campaigns = function (extern, req, res) {
+  extern.backend.fetchAll(function (err, cmps) {
+    if (err) {
+      extern.logger.log('error', 'campaigns: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(cmps);
+  });
+};
