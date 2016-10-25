@@ -27,8 +27,9 @@ var campaigns = require('./controllers/campaigns').campaigns;
 
 /* App variables */
 
+var cfgPath = process.env.LEVERAGE_API_CFG || process.argv[2] || 'config.json';
 var app = express();
-var config = JSON.parse(fs.readFileSync('config.json'));
+var config = JSON.parse(fs.readFileSync(cfgPath));
 var extern = { logger: winston };
 
 /* Endpoints */
