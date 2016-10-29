@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "eslint app.js controllers lib && LEVERAGE_API_CFG=test/config.json mocha -R spec",
+    "test": "eslint app.js controllers lib && npm run test-data && LEVERAGE_API_CFG=test/config.json mocha -R spec",
     "test-data": "rm -f test/data/db.sqlite; sqlite3 test/data/db.sqlite < test/data/records.sql"
   },
   "dependencies": {
