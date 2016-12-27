@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd {{pkg.svc_var_path}}
+exec node app.js 2>&1

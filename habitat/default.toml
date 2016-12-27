@@ -1,0 +1,8 @@
+[listen]
+address = "0.0.0.0"
+port = 8228
+
+[storage]
+path = "/srv/leverage/leverage.sqlite"
+
+[services.core.nginx.leverage]
