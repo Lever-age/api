@@ -1,5 +1,5 @@
-pkg_origin=leverage-api
-pkg_name=leverage
+pkg_origin=leverage
+pkg_name=leverage-api
 pkg_version=0.1.0
 pkg_maintainer="Chris Alfano <chris@codeforphilly.org>"
 pkg_license=(MIT)
