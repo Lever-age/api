@@ -22,8 +22,16 @@ do_unpack() {
 }
 
 do_prepare() {
-  # The `/usr/bin/env` path is hardcoded, so we'll add a symlink if needed.
-  # We can't do fix_interpreter here without adding a coreutils runtime dep.
+  # This hack deals with some npm package build scripts having
+  # /usr/bin/env hardcoded instead of using env from PATH by
+  # temporarily creating a symlink at /usr/bin/env within
+  # the build environment that links to the env executable
+  # provided by the coreutils package
+  #
+  # Habitat provides a minimal environment for builds where every
+  # available package has its bin folder added to PATH rather than
+  # its contents copied to a global /usr/bin directory
+
   if [[ ! -r /usr/bin/env ]]; then
     ln -sv "$(pkg_path_for coreutils)/bin/env" /usr/bin/env
     _clean_env=true
@@ -31,17 +39,19 @@ do_prepare() {
 }
 
 do_build() {
+  # Copy files from wherever this plan is being run from to the
+  # temporary build space for this package
   cp -vr $PLAN_CONTEXT/../* $HAB_CACHE_SRC_PATH/$pkg_dirname
 
+  # cd into the temporary build space and populate node_modules/
   cd $HAB_CACHE_SRC_PATH/$pkg_dirname
   npm install
 }
 
 do_install() {
-  # Our source files were copied over to HAB_CACHE_SRC_PATH/$pkg_dirname in do_build(),
-  # and now they need to be copied from that directory into the root directory of our package
-  # through the use of the pkg_prefix variable.
-
+  # Copy the things we want to distribute from the current
+  # directory (this package's temporary build space) to the
+  # root for this package's build
   cp -v package.json ${pkg_prefix}
   cp -v app.js ${pkg_prefix}
   cp -vr controllers ${pkg_prefix}
