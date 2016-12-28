@@ -4,5 +4,3 @@ port = 8228
 
 [storage]
 path = "/srv/leverage/leverage.sqlite"
-
-[services.core.nginx.leverage]
