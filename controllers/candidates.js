@@ -44,6 +44,25 @@ module.exports.campaignInfoByCandidate = function (extern, req, res) {
 };
 
 /**
+ * Return all Campaign objects
+ * associated with the candidate
+ * of the specified id
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.campaignsByCandidate = function (extern, req, res) {
+  extern.backend.fetchByCandidate(req.params.id, function (err, cmps) {
+    if (err) {
+      extern.logger.log('error', 'campaignsByCandidate: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(cmps);
+  });
+};
+
+/**
  * Return all candidate objects
  *
  * @param {Object} extern
