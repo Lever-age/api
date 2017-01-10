@@ -20,6 +20,7 @@ var campaigninfoById = require('./controllers/campaigns').campaigninfoById;
 var candidateinfoByCampaign = require('./controllers/campaigns').candidateinfoByCampaign;
 var campaignInfo = require('./controllers/campaigns').campaignInfo;
 var campaignInfoByCandidate = require('./controllers/candidates').campaignInfoByCandidate;
+var campaignsByCandidate = require('./controllers/candidates').campaignsByCandidate;
 var candidateById = require('./controllers/candidates').candidateById;
 var campaignsummaryById = require('./controllers/campaigns').campaignsummaryById;
 var campaignById = require('./controllers/campaigns').campaignById;
@@ -52,6 +53,11 @@ app.get('/campaigns/info', function (req, res) {
 app.get('/candidates/:id/campaigns/info', function (req, res) {
   extern.backend = new CampaignInfoStorage(config.storage);
   campaignInfoByCandidate(extern, req, res);
+});
+
+app.get('/candidates/:id/campaigns', function (req, res) {
+  extern.backend = new CampaignStorage(config.storage);
+  campaignsByCandidate(extern, req, res);
 });
 
 app.get('/candidates/:id', function (req, res) {
