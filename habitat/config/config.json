@@ -1,0 +1,9 @@
+{
+ "listen": {
+   "address": "{{cfg.listen.address}}",
+   "port": {{cfg.listen.port}}
+ },
+ "storage": {
+   "path": "{{cfg.storage.path}}"
+ }
+}
