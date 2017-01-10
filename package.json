@@ -3,27 +3,24 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "eslint app.js controllers lib && npm run test-data && LEVERAGE_API_CFG=test/config.json mocha -R spec",
+    "test-data": "rm -f test/data/db.sqlite; sqlite3 test/data/db.sqlite < test/data/records.sql"
   },
   "dependencies": {
-    "body-parser": "^1.13.3",
-    "compression": "^1.5.2",
-    "cookie-parser": "^1.3.3",
-    "express": "^4.13.3",
-    "express-handlebars": "^3.0.0",
-    "glob": "^6.0.4",
-    "method-override": "^2.3.0",
-    "mongoose": "^4.1.2",
-    "morgan": "^1.6.1",
-    "sequelize": "^3.24.3",
-    "serve-favicon": "^2.3.0"
+    "express": "^4.14.0",
+    "glob": "^7.1.0",
+    "sqlite": "^2.2.0",
+    "winston": "^2.2.0"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-develop": "^0.4.0",
-    "grunt-contrib-watch": "^0.6.1",
-    "request": "^2.60.0",
-    "time-grunt": "^1.2.1",
-    "load-grunt-tasks": "^3.2.0"
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "eslint": "^3.6.1",
+    "eslint-config-standard": "^6.2.0",
+    "eslint-plugin-promise": "^2.0.1",
+    "eslint-plugin-standard": "^2.0.1",
+    "jsdoc": "^3.4.1",
+    "mocha": "^3.0.2"
   }
 }
