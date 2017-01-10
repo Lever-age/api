@@ -42,3 +42,20 @@ module.exports.campaignInfoByCandidate = function (extern, req, res) {
     res.json(ci);
   });
 };
+
+/**
+ * Return all candidate objects
+ *
+ * @param {Object} extern
+ * @param {Object} req
+ * @param {Object} res
+ */
+module.exports.candidates = function (extern, req, res) {
+  extern.backend.fetchAll(function (err, cmps) {
+    if (err) {
+      extern.logger.log('error', 'candidates: %s: %s', err.name, err.message);
+      return res.sendStatus(500);
+    }
+    res.json(cmps);
+  });
+};
