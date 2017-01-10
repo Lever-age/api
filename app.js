@@ -24,6 +24,7 @@ var candidateById = require('./controllers/candidates').candidateById;
 var campaignsummaryById = require('./controllers/campaigns').campaignsummaryById;
 var campaignById = require('./controllers/campaigns').campaignById;
 var campaigns = require('./controllers/campaigns').campaigns;
+var candidates = require('./controllers/candidates').candidates;
 
 /* App variables */
 
@@ -72,6 +73,11 @@ app.get('/campaigns/:id', function (req, res) {
 app.get('/campaigns', function (req, res) {
   extern.backend = new CampaignStorage(config.storage);
   campaigns(extern, req, res);
+});
+
+app.get('/candidates', function (req, res) {
+  extern.backend = new CandidateStorage(config.storage);
+  candidates(extern, req, res);
 });
 
 /* Initialize */
