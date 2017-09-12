@@ -9,14 +9,6 @@ from sqlalchemy.dialects.mysql import ENUM, YEAR
 
 
 
-class Candidacy(Base):
-    __tablename__ = 'candidacy'
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    candidate_id = sa.Column(sa.Integer, nullable=False, index=True)
-    race_id = sa.Column(sa.Integer, nullable=False, index=True)
-    candidacy_type = sa.Column(ENUM(u'incumbent', u'challenger'), nullable=False, index=True)
-    outcome = sa.Column(ENUM(u'won', u'lost'), nullable=False)
 
 
 class Candidate(Base):
@@ -36,14 +28,53 @@ class Candidate(Base):
     is_active = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'1'"))
     candidate_order = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
 
+    def __repr__(self):
+        return '<Candidate %r %r>' % (self.name_first, self.name_last)
+    
+    def as_dict(self):
+        d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        d['candidacies'] = [c.as_dict() for c in self.candidacies]
+        return d
 
-class CandidateCommittee(Base):
-    __tablename__ = 'candidate_committees'
 
-    candidate_id = sa.Column(sa.Integer, primary_key=True, nullable=False)
-    committee_id = sa.Column(sa.Integer, primary_key=True, nullable=False)
+class Candidacy(Base):
+    __tablename__ = 'candidacy'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    candidate_id = sa.Column(sa.Integer, nullable=False, index=True)
+    candidate = sa.orm.relationship('Candidate', 
+                                    primaryjoin='Candidacy.candidate_id==Candidate.id',
+                                    foreign_keys='Candidacy.candidate_id',
+                                    remote_side='Candidate.id',
+                                    backref='candidacies')
+
+    race_id = sa.Column(sa.Integer, nullable=False, index=True)
+    race = sa.orm.relationship('Race', 
+                                    primaryjoin='Candidacy.race_id==Race.id',
+                                    foreign_keys='Candidacy.race_id',
+                                    remote_side='Race.id',
+                                    backref='candidacies')
+
+    candidacy_type = sa.Column(ENUM(u'incumbent', u'challenger'), nullable=False, index=True)
+    outcome = sa.Column(ENUM(u'won', u'lost'), nullable=False)
+
+    def __repr__(self):
+        return '<Candidacy %r %r, (%r %r)>' % (self.candidate.name_first, 
+                                               self.candidate.name_last, 
+                                               self.race.election_year,
+                                               self.race.election_type)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
+candidate_committees = sa.Table('candidate_committees', Base.metadata,
+                       sa.Column('candidate_id', sa.Integer),
+                       sa.Column('committee_id', sa.Integer)
+)
+
+"""
 class CandidateFiling(Base):
     __tablename__ = 'candidate_filing'
 
@@ -63,7 +94,7 @@ class CandidateFiling(Base):
     date_filed = sa.Column(sa.DateTime, nullable=False)
     date_found = sa.Column(sa.DateTime, nullable=False)
     page_found = sa.Column(sa.String(16), nullable=False)
-
+"""
 
 class Committee(Base):
     __tablename__ = 'committee'
@@ -77,24 +108,21 @@ class Committee(Base):
     donations_2015 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
     donations_2016 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
 
-class Contributor(Base):
-    __tablename__ = 'contributor'
+    candidates = sa.orm.relationship('Candidate',
+                                     primaryjoin='Committee.id==candidate_committees.c.committee_id',
+                                     secondaryjoin='candidate_committees.c.candidate_id==Candidate.id',
+                                     secondary=candidate_committees,
+                                     backref='committees')
 
-    id = sa.Column(sa.Integer, primary_key=True)
-    address_id = sa.Column(sa.Integer, nullable=False, index=True, server_default=sa.text("'0'"))
-    name_prefix = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
-    name_first = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
-    name_middle = sa.Column(sa.String(64), nullable=False, server_default=sa.text("''"))
-    name_last = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
-    name_suffix = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
-    name_business = sa.Column(sa.String(255), nullable=False, server_default=sa.text("''"))
-    slug = sa.Column(sa.String(64), unique=True)
-    is_person = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    is_business = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    num_contributions = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    num_committees_contrib_to = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    total_contributed_2015 = sa.Column(sa.Numeric(12, 2))
-    total_contributed_2016 = sa.Column(sa.Numeric(12, 2))
+    def __repr__(self):
+        return '<Committee %r>' % self.committee_name
+
+    def as_dict(self):
+        d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        d['candidates'] = [o.as_dict() for o in self.candidates]
+
+
+
 
 
 class ContributorAddres(Base):
@@ -117,6 +145,13 @@ class ContributorAddres(Base):
     num_individual_contribs = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     num_non_individual_contribs = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
 
+    def __repr__(self):
+        return '<ContributorAddres %r %r>' % (self.id, self.addr1)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
 
 class ContributorType(Base):
     __tablename__ = 'contributor_type'
@@ -126,6 +161,48 @@ class ContributorType(Base):
     type_slug = sa.Column(sa.String(32), nullable=False, index=True, server_default=sa.text("''"))
     type_description = sa.Column(sa.Text)
 
+    def __repr__(self):
+        return '<ContributorType %r %r, (%r %r)>' % (self.type_name)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+
+class Contributor(Base):
+    __tablename__ = 'contributor'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    address_id = sa.Column(sa.Integer, nullable=False, index=True, server_default=sa.text("'0'"))
+    address = sa.orm.relationship('ContributorAddres', 
+                                    primaryjoin='Contributor.address_id==ContributorAddres.id',
+                                    foreign_keys='Contributor.address_id',
+                                    remote_side='ContributorAddres.id',
+                                    backref='contributors')
+
+    name_prefix = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
+    name_first = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
+    name_middle = sa.Column(sa.String(64), nullable=False, server_default=sa.text("''"))
+    name_last = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
+    name_suffix = sa.Column(sa.String(64), nullable=False, index=True, server_default=sa.text("''"))
+    name_business = sa.Column(sa.String(255), nullable=False, server_default=sa.text("''"))
+    slug = sa.Column(sa.String(64), unique=True)
+    is_person = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    is_business = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    num_contributions = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    num_committees_contrib_to = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    total_contributed_2015 = sa.Column(sa.Numeric(12, 2))
+    total_contributed_2016 = sa.Column(sa.Numeric(12, 2))
+
+    def __repr__(self):
+        return '<Contributor %r %r>' % (self.name_first, 
+                                               self.name_last)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+
 
 class Party(Base):
     __tablename__ = 'party'
@@ -134,6 +211,14 @@ class Party(Base):
     party_name = sa.Column(sa.String(32), nullable=False)
     slug = sa.Column(sa.String(32), nullable=False)
     party_order = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+
+    def __repr__(self):
+        return '<Party %r>' % (self.party_name)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
 
 
 class PoliticalDonation(Base):
@@ -220,6 +305,7 @@ class Race(Base):
     
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class RawDonation(Base):
     __tablename__ = 'raw_donations'
