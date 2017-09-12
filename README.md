@@ -38,6 +38,21 @@ source venv/bin/activate
 
 ## Setup your database
 
+For now, load the mysql files from the datadump directory. Load the tables.sql first, then data.sql
+
+
+## Run the server, then test the api endpoints
+```bash
+python runserver.py
+```
+
+* /api/races/ (same as /api/races/general/2017)
+* /api/races/primary/2015
+* /api/candidates/27
+* /api/candidates/28
+
+## Illinois Sunshine DB instructions:
+
 Before we can run the website, we need to create a database.
 
 ```bash
