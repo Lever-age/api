@@ -1,6 +1,6 @@
-from sunshine import create_app
-from sunshine.cache import cache
-from sunshine.app_config import CACHE_CONFIG
+from leverageapi import create_app
+from leverageapi.cache import cache
+from leverageapi.app_config import CACHE_CONFIG
 
 def main():
     app = create_app()
