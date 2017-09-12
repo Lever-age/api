@@ -43,8 +43,8 @@ def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
     objs = [r.as_dict() for r in races]
 
     resp = {}
-    resp['objects'] = objs
-    resp['meta'] = {}
+    resp['metadata'] = {}
+    resp['data'] = objs
     """
     resp['meta']['query'] = {
         'limit': limit,
@@ -80,8 +80,8 @@ def candidates(race_id):
     objs = [c.as_dict() for c in candidates]
 
     resp = {}
-    resp['objects'] = objs
-    resp['meta'] = {}
+    resp['metadata'] = {}
+    resp['data'] = objs
     """
     resp['meta']['query'] = {
         'limit': limit,
