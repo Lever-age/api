@@ -28,7 +28,7 @@ operator_lookup = {
 }
 
 @api.route('/races/<election_type>/<election_year>')
-@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
 
     races = db_session.query(Race)\
@@ -65,7 +65,7 @@ def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
 
 
 @api.route('/candidates/<race_id>')
-@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def candidates(race_id):
 
     candidates = db_session.query(Candidate)\
