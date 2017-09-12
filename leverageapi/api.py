@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from leverageapi.database import db_session
 from leverageapi.models import *
 from leverageapi.cache import cache, make_cache_key, CACHE_TIMEOUT
+from leverageapi.app_config import DEFAULT_RACE, DEFAULT_YEAR
 from flask import Blueprint, render_template, request, make_response, g, abort
 import json
 from datetime import datetime, date
@@ -28,9 +29,11 @@ operator_lookup = {
 
 @api.route('/races/')
 @cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
-def races(election_type='general', election_year=2017):
+def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
 
-    races = db_session.query(Race)
+    races = db_session.query(Race)\
+                .filter(Race.election_type==election_type)\
+                .filter(Race.election_year==election_year)
 
     print (races)
 
