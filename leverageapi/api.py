@@ -27,7 +27,7 @@ operator_lookup = {
     'lt': '<'
 }
 
-@api.route('/races/')
+@api.route('/races/<election_type>/<election_year>')
 @cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
 
@@ -35,7 +35,7 @@ def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
                 .filter(Race.election_type==election_type)\
                 .filter(Race.election_year==election_year)
 
-    print (races)
+    #print (races)
 
     objs = [r.as_dict() for r in races]
 
@@ -61,7 +61,46 @@ def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
     response = make_response(response_str, 200)
     response.headers['Content-Type'] = 'application/json'
 
-    return response    
+    return response
+
+
+@api.route('/candidates/<race_id>')
+@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def candidates(race_id):
+
+    candidates = db_session.query(Candidate)\
+                .join(Candidate.candidacies)\
+                .filter(Candidacy.race_id==race_id)
+
+    #print (races)
+
+    objs = [c.as_dict() for c in candidates]
+
+    resp = {}
+    resp['objects'] = objs
+    resp['meta'] = {}
+    """
+    resp['meta']['query'] = {
+        'limit': limit,
+        'offset': offset,
+        'sort_order': sort_order,
+        'order_by': order_by,
+    })
+    
+    response = app.response_class(
+        response=json.dumps(data),
+        status=200,
+        mimetype='application/json'
+    )
+    """
+
+    response_str = json.dumps(resp, sort_keys=False, default=dthandler)
+    response = make_response(response_str, 200)
+    response.headers['Content-Type'] = 'application/json'
+
+    return response
+
+
 
 """
 def sanitizeSearchTerm(term):
