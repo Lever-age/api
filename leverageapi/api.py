@@ -27,8 +27,8 @@ operator_lookup = {
     'lt': '<'
 }
 
-#@api.route('/races/<election_type>/<election_year>')
 @api.route('/races/')
+@api.route('/races/<election_type>/<election_year>')
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
 
