@@ -8,9 +8,6 @@ from sqlalchemy.dialects.mysql import ENUM, YEAR
 
 
 
-
-
-
 class Candidate(Base):
     __tablename__ = 'candidate'
 
