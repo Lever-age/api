@@ -27,12 +27,21 @@ operator_lookup = {
     'lt': '<'
 }
 
-@api.route('/races/')
-@api.route('/races/<election_type>/<election_year>')
+@api.route('/races', methods=['GET'])
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
-def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
+def races():
 
-    print('In races')
+    #print('In races')
+
+    if 'election_type' in request.args:
+        election_type = request.args['election_type']
+    else:
+        election_type = DEFAULT_RACE
+
+    if 'election_year' in request.args:
+        election_year = request.args['election_year']
+    else:
+        election_year = DEFAULT_YEAR
 
     races = db_session.query(Race)\
                 .filter(Race.election_type==election_type)\
@@ -67,9 +76,14 @@ def races(election_type=DEFAULT_RACE, election_year=DEFAULT_YEAR):
     return response
 
 
-@api.route('/candidates/<race_id>')
+@api.route('/candidates', methods=['GET'])
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
-def candidates(race_id):
+def candidates():
+
+    if 'race_id' in request.args:
+        race_id = request.args['race_id']
+    else:
+        race_id = 1
 
     candidates = db_session.query(Candidate)\
                 .join(Candidate.candidacies)\

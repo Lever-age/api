@@ -46,10 +46,10 @@ For now, load the mysql files from the datadump directory. Load the tables.sql f
 python runserver.py
 ```
 
-* /api/races/ (same as /api/races/general/2017)
-* /api/races/primary/2015
-* /api/candidates/27
-* /api/candidates/28
+* /api/races (same as /api/races?election_type=general&election_year=2017)
+* /api/races?election_type=primary&election_year=2015
+* /api/candidates?race_id=27
+* /api/candidates?race_id=28
 
 ## Illinois Sunshine DB instructions:
 
