@@ -101,7 +101,17 @@ def candidates():
 
     #print (races)
 
-    objs = [c.as_dict() for c in candidates]
+    objs = []
+
+    for c in candidates:
+
+        candidate = c.as_dict()
+
+        candidate['total_money_donated'] = 0
+        candidate['total_money_spent'] = 0
+        #candidate['previous_races'] = {}
+
+        objs.append(candidate)
 
     resp = {}
     resp['metadata'] = {}
