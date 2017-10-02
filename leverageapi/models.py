@@ -304,6 +304,9 @@ class Race(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
+"""
+
+
 class RawDonation(Base):
     __tablename__ = 'raw_donations'
 
@@ -332,8 +335,6 @@ class RawDonation(Base):
     SubDate = sa.Column(sa.String(32), nullable=False)
     FiledBy = sa.Column(sa.String(128), nullable=False)
 
-
-"""
 
 class CiceroDistrict(Base):
     __tablename__ = 'cicero_district'

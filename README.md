@@ -13,7 +13,7 @@ Initially copied from Illinois Sunshine.
 
 We recommend using [virtualenv](http://virtualenv.readthedocs.org/en/latest/virtualenv.html) and [virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/install.html) for working in a virtualized development environment. [Read how to set up virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 
-Once you have virtualenvwrapper set up,
+Once you have virtualenvwrapper set up (make sure to initialize as a Python 3 project),
 
 ```bash
 mkdir leverage

@@ -1,0 +1,5 @@
+mysqldump leverage_philly -u leverage -pleverage_pass --no-data > datadump/tables.sql
+
+
+mysqldump leverage_philly -u leverage -pleverage_pass candidacy candidate candidate_committees committee party race > datadump/data.sql
+
