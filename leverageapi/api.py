@@ -27,6 +27,23 @@ operator_lookup = {
     'lt': '<'
 }
 
+def return_error(message):
+
+    resp = {
+        'status': 'error',
+        'message': message,
+        'meta': {},
+        'objects': {},
+    }
+    status_code = 400
+    valid = False
+
+    response_str = json.dumps(resp, sort_keys=False, default=dthandler)
+    response = make_response(response_str, status_code)
+    response.headers['Content-Type'] = 'application/json'
+
+    return response    
+
 @api.route('/races', methods=['GET'])
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def races():
@@ -100,12 +117,13 @@ def candidates():
 
     if 'race_id' in request.args:
         race_id = request.args['race_id']
+
     else:
-        race_id = 1
+        return return_error('race_id must be sent to candidates endpoint.')
 
     candidates = db_session.query(Candidate)\
-                .join(Candidate.candidacies)\
-                .filter(Candidacy.race_id==race_id)
+        .join(Candidate.candidacies)\
+        .filter(Candidacy.race_id==race_id) 
 
     #print (races)
 
