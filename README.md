@@ -48,6 +48,7 @@ python runserver.py
 
 * /api/races (same as /api/races?election_type=general&election_year=2017)
 * /api/races?election_type=primary&election_year=2015
+* /api/races?race_id=27
 * /api/candidates?race_id=27
 * /api/candidates?race_id=28
 

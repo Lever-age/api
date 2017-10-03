@@ -43,9 +43,17 @@ def races():
     else:
         election_year = DEFAULT_YEAR
 
-    races = db_session.query(Race)\
-                .filter(Race.election_type==election_type)\
-                .filter(Race.election_year==election_year)
+    # If race_id is in request.args, only return that race
+    if 'race_id' in request.args:
+
+        races = db_session.query(Race)\
+            .filter(Race.id==request.args['race_id'])
+
+    else:
+
+        races = db_session.query(Race)\
+            .filter(Race.election_type==election_type)\
+            .filter(Race.election_year==election_year)
 
     #print (races)
 
