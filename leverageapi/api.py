@@ -118,12 +118,20 @@ def candidates():
     if 'race_id' in request.args:
         race_id = request.args['race_id']
 
+        candidates = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .filter(Candidacy.race_id==race_id) 
+
+    elif 'candidate_id' in request.args:
+        candidate_id = request.args['candidate_id']
+
+        candidates = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .filter(Candidate.id==candidate_id) 
+
     else:
         return return_error('race_id must be sent to candidates endpoint.')
 
-    candidates = db_session.query(Candidate)\
-        .join(Candidate.candidacies)\
-        .filter(Candidacy.race_id==race_id) 
 
     #print (races)
 
@@ -163,6 +171,67 @@ def candidates():
 
     return response
 
+
+
+
+@api.route('/contributions', methods=['GET'])
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def contributions():
+
+    if 'race_id' in request.args:
+        race_id = request.args['race_id']
+
+        contributions = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .filter(Candidacy.race_id==race_id) 
+
+    elif 'candidate_id' in request.args:
+        candidate_id = request.args['candidate_id']
+
+        contributions = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .filter(Candidacy.race_id==race_id) 
+
+    else:
+        return return_error('Either race_id or candidate_id must be sent to candidates endpoint.')
+
+    #print (races)
+
+    objs = []
+
+    for c in candidates:
+
+        candidate = c.as_dict()
+
+        candidate['total_money_donated'] = 0
+        candidate['total_money_spent'] = 0
+        #candidate['previous_races'] = {}
+
+        objs.append(candidate)
+
+    resp = {}
+    resp['metadata'] = {}
+    resp['data'] = objs
+    """
+    resp['meta']['query'] = {
+        'limit': limit,
+        'offset': offset,
+        'sort_order': sort_order,
+        'order_by': order_by,
+    })
+    
+    response = app.response_class(
+        response=json.dumps(data),
+        status=200,
+        mimetype='application/json'
+    )
+    """
+
+    response_str = json.dumps(resp, sort_keys=False, default=dthandler)
+    response = make_response(response_str, 200)
+    response.headers['Content-Type'] = 'application/json'
+
+    return response
 
 
 """

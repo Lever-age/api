@@ -51,6 +51,7 @@ python runserver.py
 * /api/races?race_id=27
 * /api/candidates?race_id=27
 * /api/candidates?race_id=28
+* /api/candidates?candidate_id=47
 
 ## Illinois Sunshine DB instructions:
 
