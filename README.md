@@ -8,6 +8,12 @@ Initially copied from Illinois Sunshine.
 
 * Python 3.4
 * PostgreSQL 9.4 +
+* MySQL client libraries + development headers
+  + Ubuntu Xenial: `libmysqlclient-dev` package
+  + Debian Stretch: `libmariadbclient-dev` package
+  + Fedora 26/CentOS 7: `mariadb-devel` package
+  + OpenSUSE Leap 42.3: `libmysqlclient-devel` package
+  + OS X Sierra: `mysql` homebrew formula
 
 **Install app requirements**
 
