@@ -1,8 +1,6 @@
 from leverageapi import create_app
-from flask_cors import CORS
 
 app = create_app()
-CORS(app)
 
 if __name__ == "__main__":
     import sys
@@ -14,4 +12,9 @@ if __name__ == "__main__":
         host = sys.argv[2]
     except (IndexError, ValueError):
         host = '127.0.0.1'
+    try:
+      from flask_cors import CORS
+      CORS(app)
+    except ImportError:
+      pass
     app.run(debug=True, port=port, host=host)
