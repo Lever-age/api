@@ -4,7 +4,7 @@ Initially copied from Illinois Sunshine.
 
 ## Setup
 
-**Install OS level dependencies:** 
+**Install OS level dependencies:**
 
 * Python 3.4
 * PostgreSQL 9.4 +
@@ -29,7 +29,7 @@ cd api
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp api/app_config.py.example api/app_config.py
+cp leverageapi/app_config.py.example leverageapi/app_config.py
 ```
 
 In `app_config.py`, put your Postgres user in `DB_USER` and password in `DB_PW`.
@@ -126,7 +126,7 @@ If something is not behaving intuitively, it is a bug, and should be reported.
 Report it here: https://github.com/datamade/leverage-api/issues
 
 ## Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Commit, do not mess with rakefile, version, or history.
