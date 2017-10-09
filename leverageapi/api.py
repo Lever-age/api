@@ -42,7 +42,7 @@ def return_error(message):
     response = make_response(response_str, status_code)
     response.headers['Content-Type'] = 'application/json'
 
-    return response    
+    return response
 
 @api.route('/races', methods=['GET'])
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
@@ -96,7 +96,7 @@ def races():
         'sort_order': sort_order,
         'order_by': order_by,
     })
-    
+
     response = app.response_class(
         response=json.dumps(data),
         status=200,
@@ -107,6 +107,7 @@ def races():
     response_str = json.dumps(resp, sort_keys=False, default=dthandler)
     response = make_response(response_str, 200)
     response.headers['Content-Type'] = 'application/json'
+    # response.headers['Access-Control-Allow-Origin'] = '*'
 
     return response
 
@@ -120,14 +121,21 @@ def candidates():
 
         candidates = db_session.query(Candidate)\
             .join(Candidate.candidacies)\
-            .filter(Candidacy.race_id==race_id) 
+            .filter(Candidacy.race_id==race_id)
 
     elif 'candidate_id' in request.args:
         candidate_id = request.args['candidate_id']
 
         candidates = db_session.query(Candidate)\
             .join(Candidate.candidacies)\
-            .filter(Candidate.id==candidate_id) 
+            .filter(Candidate.id==candidate_id)
+
+    elif 'slug' in request.args:
+        candidate_slug = request.args['slug']
+
+        candidates = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .filter(Candidate.slug==candidate_slug)
 
     else:
         return return_error('race_id must be sent to candidates endpoint.')
@@ -157,7 +165,7 @@ def candidates():
         'sort_order': sort_order,
         'order_by': order_by,
     })
-    
+
     response = app.response_class(
         response=json.dumps(data),
         status=200,
@@ -168,6 +176,7 @@ def candidates():
     response_str = json.dumps(resp, sort_keys=False, default=dthandler)
     response = make_response(response_str, 200)
     response.headers['Content-Type'] = 'application/json'
+    # response.headers['Access-Control-Allow-Origin'] = '*'
 
     return response
 
@@ -183,14 +192,14 @@ def contributions():
 
         contributions = db_session.query(Candidate)\
             .join(Candidate.candidacies)\
-            .filter(Candidacy.race_id==race_id) 
+            .filter(Candidacy.race_id==race_id)
 
     elif 'candidate_id' in request.args:
         candidate_id = request.args['candidate_id']
 
         contributions = db_session.query(Candidate)\
             .join(Candidate.candidacies)\
-            .filter(Candidacy.race_id==race_id) 
+            .filter(Candidacy.race_id==race_id)
 
     else:
         return return_error('Either race_id or candidate_id must be sent to candidates endpoint.')
@@ -219,7 +228,7 @@ def contributions():
         'sort_order': sort_order,
         'order_by': order_by,
     })
-    
+
     response = app.response_class(
         response=json.dumps(data),
         status=200,
@@ -230,6 +239,7 @@ def contributions():
     response_str = json.dumps(resp, sort_keys=False, default=dthandler)
     response = make_response(response_str, 200)
     response.headers['Content-Type'] = 'application/json'
+    # response.headers['Access-Control-Allow-Origin'] = '*'
 
     return response
 
@@ -239,7 +249,7 @@ def sanitizeSearchTerm(term):
     allowed_punctuation = set(['&', '|', '"', "'"])
     all_punctuation = set(punctuation)
     punct = "".join(all_punctuation - allowed_punctuation)
-    term = re.sub(r"[{}]+".format(re.escape(punct)), 
+    term = re.sub(r"[{}]+".format(re.escape(punct)),
                   " ", \
                   term)
 
@@ -274,19 +284,19 @@ def sanitizeSearchTerm(term):
 
     return term
 
-def getSearchResults(term, 
-                     table_name, 
+def getSearchResults(term,
+                     table_name,
                      q_params={}):
-    
+
     if table_name in ['receipts', 'expenditures', 'investments']:
-        
+
         if table_name in ['receipts', 'expenditures']:
             table_name = 'condensed_%s' % table_name
 
-        result = ''' 
+        result = '''
             SELECT *
             FROM (
-              SELECT 
+              SELECT
                 c.name AS committee_name,
                 r.*
               FROM {0} AS r
@@ -297,16 +307,16 @@ def getSearchResults(term,
             ) AS {0}
             WHERE 1=1
         '''.format(table_name)
-    
+
     elif table_name == 'officers':
-        result = ''' 
-            SELECT 
+        result = '''
+            SELECT
               c.id AS committee_id,
               c.name AS committee_name,
               c.active AS committee_active,
               o.id,
-              o.last_name, 
-              o.first_name, 
+              o.last_name,
+              o.first_name,
               o.address1,
               o.address2,
               o.city,
@@ -324,25 +334,25 @@ def getSearchResults(term,
               ON oc.committee_id = c.id
             WHERE to_tsquery('english', :term) @@ o.search_name
         '''.format(table_name)
-        
+
 
     else:
-        result = ''' 
+        result = '''
             SELECT *
             FROM {0},
                  to_tsquery('english', :term) AS query
             WHERE query @@ search_name
         '''.format(table_name)
-        
-    
+
+
     if q_params:
-        sa_table = sa.Table(table_name, 
-                            sa.MetaData(), 
-                            autoload=True, 
+        sa_table = sa.Table(table_name,
+                            sa.MetaData(),
+                            autoload=True,
                             autoload_with=g.engine)
 
         valid_query, _, _, _  = make_query(sa_table, q_params)
-        
+
         if valid_query:
             clauses = []
             for key in q_params.keys():
@@ -353,13 +363,13 @@ def getSearchResults(term,
                     except ValueError:
                         fieldname = key
                         operator = '='
-                    
+
                     if table_name == 'officers' and key.startswith('search_date'):
                         clauses.append('o.%s %s :%s' % (fieldname, operator, key))
-                    
+
                     else:
                         clauses.append('%s %s :%s' % (fieldname, operator, key))
-            
+
             result = '{0} AND {1}'.format(result, ' AND '.join(clauses))
 
             q_params['term'] = sanitizeSearchTerm(term)
@@ -372,7 +382,7 @@ def getSearchResults(term,
     q_params['term'] = sanitizeSearchTerm(term)
 
     results = g.engine.execute(sa.text(result), **q_params)
-    
+
     return results
 
 @api.route('/advanced-search/')
@@ -384,7 +394,7 @@ def advanced_search():
         'meta': {},
         'objects': {},
     }
-    
+
     status_code = 200
     valid = True
 
@@ -397,23 +407,23 @@ def advanced_search():
 
     if request.args.get('length'):
         limit = request.args['length']
-    
+
     if request.args.get('start'):
         offset = request.args['start']
-    
+
     if request.args.get('order[0][column]'):
         col_idx = request.args['order[0][column]']
         order_by_col = request.args['columns[' + str(col_idx) + '][data]']
-        
+
         sort_order = request.args['order[0][dir]']
         reverse_sort = True
         if sort_order == 'asc':
             reverse_sort = False
-    
+
     default_tables = ['committees', 'candidates', 'receipts', 'expenditures', 'officers']
 
     table_names = request.args.getlist('table_name')
-   
+
     if not table_names:
         table_names = default_tables
 
@@ -422,7 +432,7 @@ def advanced_search():
         resp['message'] = 'A search term is required'
         status_code = 400
         valid = False
-    
+
     elif len(term) < 3:
         resp['status'] = 'error'
         resp['message'] = 'Search term must be at least 3 characters long'
@@ -431,27 +441,27 @@ def advanced_search():
 
     if valid:
 
-        # Need to figure a way to do any column. This will 
+        # Need to figure a way to do any column. This will
         # just work for search_date for the time being
-        
+
         q_params = {k:v for k,v in request.args.items() if k.startswith('search_date') and v}
-        
+
         objects = {}
-        
+
         for table_name in table_names:
-            
-            results = getSearchResults(term, 
-                                       table_name, 
+
+            results = getSearchResults(term,
+                                       table_name,
                                        q_params=q_params)
-            
+
             objects[table_name] = [OrderedDict(zip(r.keys(), r.values())) for r in results]
-        
+
         start_idx = int(offset)
         end_idx = int(offset) + int(limit)
         total_rows = 0
-        
+
         if datatype == 'csv':
-            
+
             zfoutp = BytesIO()
             with zipfile.ZipFile(zfoutp, 'w') as zf:
 
@@ -464,80 +474,80 @@ def advanced_search():
                         zf.writestr('%s.csv' % table_name, outp.getvalue())
 
             response = make_response(zfoutp.getvalue(), 200)
-            
+
             filedate = datetime.now().strftime('%Y-%m-%d')
             response.headers['Content-Type'] = 'application/zip'
             fname = 'Leverage API_Search_%s_%s.zip' % ('_'.join(term.split(' ')), filedate)
             response.headers['Content-Disposition'] = 'attachment; filename="%s"' % (fname)
-            
+
             return response
 
         else:
             for table_name, records in objects.items():
-                
+
                 if table_name == 'receipts':
-                    
+
                     receipts_col = order_by_col
 
                     if not order_by_col:
                         receipts_col = 'received_date'
                         reverse_sort = True
-                    
-                    records = sorted(records, 
-                                     key=lambda r: r[receipts_col] if r[receipts_col] else "", 
+
+                    records = sorted(records,
+                                     key=lambda r: r[receipts_col] if r[receipts_col] else "",
                                      reverse=reverse_sort)
-                    
+
                 elif table_name == 'expenditures':
-                    
+
                     exp_col = order_by_col
 
                     if not order_by_col:
                         exp_col = 'expended_date'
                         reverse_sort = True
-                    
-                    records = sorted(records, 
-                                     key=lambda r: r[exp_col] if r[exp_col] else "", 
+
+                    records = sorted(records,
+                                     key=lambda r: r[exp_col] if r[exp_col] else "",
                                      reverse=reverse_sort)
-         
+
                 elif table_name == 'investments':
-                    
+
                     inv_col = order_by_col
 
                     if not order_by_col:
                         inv_col = 'purchase_date'
                         reverse_sort = True
-                    
-                    records = sorted(records, 
-                                     key=lambda r: r[inv_col] if r[inv_col] else "", 
+
+                    records = sorted(records,
+                                     key=lambda r: r[inv_col] if r[inv_col] else "",
                                      reverse=reverse_sort)
-                
+
                 elif table_name == 'committees':
-                    
+
                     cmt_col = order_by_col
 
                     if not order_by_col:
                         cmt_col = 'name'
                         reverse_sort = False
-                    
-                    records = sorted(records, 
-                                     key=lambda r: str(r[cmt_col]) if str(r[cmt_col]) else "", 
+
+                    records = sorted(records,
+                                     key=lambda r: str(r[cmt_col]) if str(r[cmt_col]) else "",
                                      reverse=reverse_sort)
-         
+
                 else:
-                    
+
                     other_col = order_by_col
 
                     if not order_by_col:
                         other_col = 'last_name'
                         reverse_sort = False
 
-                    records = sorted(records, 
-                                     key=lambda r: str(r[other_col]) if str(r[other_col]) else "", 
+                    records = sorted(records,
+                                     key=lambda r: str(r[other_col]) if str(r[other_col]) else "",
                                      reverse=reverse_sort)
-                
+
                 total_rows += len(records)
                 resp['objects'][table_name] = records[start_idx:end_idx]
-         
+
             resp['meta'] = {
                 'total_rows': total_rows,
                 'limit': limit,
@@ -546,7 +556,7 @@ def advanced_search():
             }
             resp['recordsTotal'] = total_rows
             resp['recordsFiltered'] = total_rows
-        
+
             if request.args.get('draw'):
                 resp['draw'] = int(request.args['draw'])
 
@@ -574,8 +584,8 @@ def top_money():
         status_code = 400
 
     else:
-        top_donors = ''' 
-            SELECT 
+        top_donors = '''
+            SELECT
               SUM(amount) AS total,
               first_name,
               last_name,
@@ -587,7 +597,7 @@ def top_money():
             LIMIT 20
         '''.format(table)
 
-        top_donors = g.engine.execute(sa.text(top_donors), 
+        top_donors = g.engine.execute(sa.text(top_donors),
                                     committee_id=committee_id)
 
         resp['objects'] = [OrderedDict(zip(r.keys(), r.values())) \
@@ -618,39 +628,39 @@ def committees():
         committee_cols = [c.label('committee_%s' % c.name) for c in committee_table.columns]
         candidate_cols = [c.label('candidate_%s' % c.name) for c in candidates_table.columns]
         all_columns = committee_cols + candidate_cols
-        
+
         base_query = db_session.query(*all_columns)\
-                .join(candidate_committees, 
+                .join(candidate_committees,
                     candidate_committees.c.committee_id == committee_table.c.id)\
-                .join(candidates_table, 
+                .join(candidates_table,
                     candidate_committees.c.candidate_id == candidates_table.c.id)
-        
+
         for clause in query_clauses:
             base_query = base_query.filter(clause)
-        
+
         order_by_col = getattr(committee_table.c, order_by)
         base_query = base_query.order_by(getattr(order_by_col, sort_order)())
         base_query = base_query.limit(limit)
-        
+
         objs = []
-        committee_fields = committee_table.columns.keys() 
+        committee_fields = committee_table.columns.keys()
         candidate_fields = candidates_table.columns.keys()
         rows = sorted(list(base_query.all()), key=attrgetter('committee_id'))
-        
+
         for committee, grouping in groupby(rows, attrgetter('committee_id')):
             rows = list(grouping)
             committee_values = rows[0][:len(committee_fields)]
             committee_info = OrderedDict(zip(committee_fields, committee_values))
             candidates = []
-            
+
             for row in rows:
                 candidate_values = row[len(committee_fields):]
                 candidate_info = OrderedDict(zip(candidate_fields, candidate_values))
                 candidates.append(candidate_info)
-            
+
             committee_info['candidates'] = candidates
             objs.append(committee_info)
-        
+
         resp['objects'] = objs
         resp['meta']['query'].update({
             'limit': limit,
@@ -658,7 +668,7 @@ def committees():
             'sort_order': sort_order,
             'order_by': order_by,
         })
-    
+
     response = make_response(json.dumps(resp, default=dthandler, sort_keys=False))
     response.headers['Content-Type'] = 'application/json'
     return response
@@ -666,20 +676,20 @@ def committees():
 @api.route('/receipts/')
 @cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def receipts():
-    
+
     raw_query_params = request.args.copy()
     limit = request.args.get('limit', 1000)
     offset = request.args.get('offset', 0)
     order_by = request.args.get('order_by', 'received_date')
     sort_order = request.args.get('sort_order', 'desc')
     datatype = request.args.get('datatype')
-    
-    receipts_table = sa.Table('condensed_receipts', sa.MetaData(), 
-                              autoload=True, 
+
+    receipts_table = sa.Table('condensed_receipts', sa.MetaData(),
+                              autoload=True,
                               autoload_with=db_session.bind)
 
     valid_query, query_clauses, resp, status_code = make_query(receipts_table, raw_query_params)
-    
+
     if not raw_query_params.get('committee_id'):
         resp = {
             'status' : 'error',
@@ -687,29 +697,29 @@ def receipts():
         }
         status_code = 400
         valid_query = False
-    
+
     if valid_query:
         committees_table = Committee.__table__
-        
+
         committee_cols = [c.label('committee_%s' % c.name) for c in committees_table.columns]
         receipt_cols = [c.label('receipt_%s' % c.name) for c in receipts_table.columns]
         all_columns = committee_cols + receipt_cols
-        
+
         base_query = db_session.query(*all_columns)\
                 .join(receipts_table, receipts_table.c.committee_id == committees_table.c.id)
         for clause in query_clauses:
             base_query = base_query.filter(clause)
-        
+
         order_by_col = getattr(receipts_table.c, order_by)
         base_query = base_query.order_by(getattr(order_by_col, sort_order)())
-        
+
         limit_query = base_query.limit(limit)
         limit_query = limit_query.offset(offset)
 
         objs = []
-        committee_fields = committees_table.columns.keys() 
+        committee_fields = committees_table.columns.keys()
         receipt_fields = receipts_table.columns.keys()
-        
+
         rows = sorted(list(limit_query.all()), key=attrgetter('committee_id'))
         committee_info = {'receipts': [], 'name': ''}
         for committee, grouping in groupby(rows, attrgetter('committee_id')):
@@ -723,23 +733,23 @@ def receipts():
                 receipts.append(receipt_info)
             committee_info['receipts'] = receipts
             objs.append(committee_info)
-        
+
         if datatype == 'csv':
             outp = StringIO()
             writer = csv.writer(outp)
             records = committee_info['receipts']
-            
+
             if records:
                 writer.writerow(list(records[0].keys()))
                 writer.writerows([list(r.values()) for r in records])
-            
+
             response = make_response(outp.getvalue(), 200)
-            
+
             filedate = datetime.now().strftime('%Y-%m-%d')
             response.headers['Content-Type'] = 'text/csv'
             fname = 'Leverage_API_Committee_Receipts_%s_%s.csv' % ('_'.join(committee_info['name'].split(' ')), filedate)
             response.headers['Content-Disposition'] = 'attachment; filename="%s"' % (fname)
-            
+
             return response
 
         total_rows = base_query.count()
@@ -767,11 +777,11 @@ def expenditures():
     sort_order = request.args.get('sort_order', 'desc')
     datatype = request.args.get('datatype')
 
-    expenditures_table = sa.Table('condensed_expenditures', sa.MetaData(), 
+    expenditures_table = sa.Table('condensed_expenditures', sa.MetaData(),
                                   autoload=True, autoload_with=db_session.bind)
-    
+
     valid_query, query_clauses, resp, status_code = make_query(expenditures_table, raw_query_params)
-    
+
     if not raw_query_params.get('committee_id'):
         resp = {
             'status' : 'error',
@@ -779,28 +789,28 @@ def expenditures():
         }
         status_code = 400
         valid_query = False
-    
+
     if valid_query:
         committees_table = Committee.__table__
-        
+
         committee_cols = [c.label('committee_%s' % c.name) for c in committees_table.columns]
         expenditure_cols = [c.label('expenditure_%s' % c.name) for c in expenditures_table.columns]
         all_columns = committee_cols + expenditure_cols
-        
+
         base_query = db_session.query(*all_columns)\
-                         .join(expenditures_table, 
+                         .join(expenditures_table,
                                expenditures_table.c.committee_id == committees_table.c.id)
 
         for clause in query_clauses:
             base_query = base_query.filter(clause)
-        
+
         order_by_col = getattr(expenditures_table.c, order_by)
         base_query = base_query.order_by(getattr(order_by_col, sort_order)())
         limit_query = base_query.limit(int(limit))
         limit_query = limit_query.offset(int(offset))
 
         objs = []
-        committee_fields = committees_table.columns.keys() 
+        committee_fields = committees_table.columns.keys()
         expenditure_fields = expenditures_table.columns.keys()
         rows = sorted(list(limit_query.all()), key=attrgetter('committee_id'))
         committee_info = {'expenditures': [], 'name': ''}
@@ -815,27 +825,27 @@ def expenditures():
                 expenditures.append(expenditure_info)
             committee_info['expenditures'] = expenditures
             objs.append(committee_info)
-        
+
         if datatype == 'csv':
             outp = StringIO()
             writer = csv.writer(outp)
             records = committee_info['expenditures']
-            
+
             if records:
                 writer.writerow(list(records[0].keys()))
                 writer.writerows([list(r.values()) for r in records])
-            
+
             response = make_response(outp.getvalue(), 200)
-            
+
             filedate = datetime.now().strftime('%Y-%m-%d')
             response.headers['Content-Type'] = 'text/csv'
             fname = 'Leverage_API_Committee_Expenditures_%s_%s.csv' % ('_'.join(committee_info['name'].split(' ')), filedate)
             response.headers['Content-Disposition'] = 'attachment; filename="%s"' % (fname)
-            
+
             return response
 
         total_rows = base_query.count()
-        
+
         resp['objects'] = objs
         resp['meta']['query'].update({
             'limit': limit,
@@ -844,8 +854,8 @@ def expenditures():
             'order_by': order_by,
         })
         resp['meta']['total_rows'] = total_rows
-    
-    
+
+
     response = make_response(json.dumps(resp, default=dthandler, sort_keys=False))
     response.headers['Content-Type'] = 'application/json'
     return response
@@ -859,14 +869,14 @@ def elections():
     if not election_type and not election_year:
         abort(400)
 
-    candidates = ''' 
+    candidates = '''
         SELECT cd.*
         FROM candidates AS cd
         JOIN candidacies AS cc
           ON cd.id = cc.candidate_id
         WHERE 1=1
     '''
-    
+
     query_args = {}
 
     if election_type:
@@ -876,10 +886,10 @@ def elections():
     if election_year:
         candidates = '{0} AND cc.election_year = :election_year'.format(candidates)
         query_args['election_year'] = election_year
-    
+
     candidates = [OrderedDict(zip(r.keys(), r.values())) for r in \
                       g.engine.execute(sa.text(candidates),**query_args)]
-    
+
     resp = {
         'meta': {
             'status': 'ok',
@@ -918,7 +928,7 @@ def make_query(table, raw_query_params):
         args_keys.remove('datatype')
     if 'term' in args_keys:
         args_keys.remove('term')
-    
+
     query_dict = {f: raw_query_params[f] for f in args_keys}
 
     for query_param, query_value in query_dict.items():
