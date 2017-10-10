@@ -27,6 +27,29 @@ operator_lookup = {
     'lt': '<'
 }
 
+def return_amount_donated_from_race_id(race_id):
+
+    """
+
+    """
+    donations = db_session.query(PoliticalDonation)\
+        .join(PoliticalDonation.committee)\
+        .join(Committee.candidates)\
+        .join(Candidate.candidacies)\
+        .join(PoliticalDonation.contribution_type)\
+        .filter(PoliticalDonationContributionType.is_donation==1)\
+        .filter(Candidacy.race_id==race_id)
+
+    #print (donations)
+
+    #for d in donations:
+    #    #print(dir(d.donation_amount))
+    #    print(d.donation_amount, float(d.donation_amount))
+
+    #print([d.donation_amount for d in donations])
+
+    return sum([float(d.donation_amount) for d in donations])
+
 def return_error(message):
 
     resp = {
@@ -80,7 +103,7 @@ def races():
         race = r.as_dict()
 
         race['num_candidates'] = len(r.candidacies)
-        race['total_money_donated'] = 0
+        race['total_money_donated'] = return_amount_donated_from_race_id(r.id)
         race['total_money_spent'] = 0
         race['top_donors'] = {}
 
