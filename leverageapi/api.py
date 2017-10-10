@@ -168,12 +168,6 @@ def candidates():
         candidates = db_session.query(Candidate)\
             .join(Candidate.candidacies)\
             .filter(Candidate.slug==request.args['candidate_slug'])
-            
-    elif 'slug' in request.args:
-
-        candidates = db_session.query(Candidate)\
-            .join(Candidate.candidacies)\
-            .filter(Candidate.slug==request.args['slug'])
 
     else:
         return return_error('race_id must be sent to candidates endpoint.')
