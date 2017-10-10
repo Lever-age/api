@@ -85,9 +85,12 @@ def races():
 
     # If race_id is in request.args, only return that race
     if 'race_id' in request.args:
-
         races = db_session.query(Race)\
             .filter(Race.id==request.args['race_id'])
+
+    elif 'race_slug' in request.args:
+        races = db_session.query(Race)\
+            .filter(Race.slug==request.args['race_slug'])
 
     else:
 
@@ -146,6 +149,13 @@ def candidates():
             .join(Candidate.candidacies)\
             .filter(Candidacy.race_id==race_id)
 
+    elif 'race_slug' in request.args:
+
+        candidates = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .join(Candidacy.race)\
+            .filter(Race.slug==request.args['race_slug'])
+
     elif 'candidate_id' in request.args:
         candidate_id = request.args['candidate_id']
 
@@ -153,12 +163,17 @@ def candidates():
             .join(Candidate.candidacies)\
             .filter(Candidate.id==candidate_id)
 
-    elif 'slug' in request.args:
-        candidate_slug = request.args['slug']
+    elif 'candidate_slug' in request.args:
 
         candidates = db_session.query(Candidate)\
             .join(Candidate.candidacies)\
-            .filter(Candidate.slug==candidate_slug)
+            .filter(Candidate.slug==request.args['candidate_slug'])
+            
+    elif 'slug' in request.args:
+
+        candidates = db_session.query(Candidate)\
+            .join(Candidate.candidacies)\
+            .filter(Candidate.slug==request.args['slug'])
 
     else:
         return return_error('race_id must be sent to candidates endpoint.')

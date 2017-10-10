@@ -55,9 +55,12 @@ python runserver.py
 * /api/races (same as /api/races?election_type=general&election_year=2017)
 * /api/races?election_type=primary&election_year=2015
 * /api/races?race_id=27
+* /api/races?race_slug=district-attorney
+
 * /api/candidates?race_id=27
-* /api/candidates?race_id=28
+* /api/candidates?race_slug=district-attorney
 * /api/candidates?candidate_id=47
+* /api/candidates?candidate_slug=lawrence-krasner
 
 ## Illinois Sunshine DB instructions:
 
