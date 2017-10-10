@@ -62,6 +62,9 @@ python runserver.py
 * /api/candidates?candidate_id=47
 * /api/candidates?candidate_slug=lawrence-krasner
 
+* /api/contributions?candidate_slug=lawrence-krasner
+* /api/contributions?race_slug=district-attorney
+
 ## Illinois Sunshine DB instructions:
 
 Before we can run the website, we need to create a database.

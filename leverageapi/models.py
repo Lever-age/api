@@ -12,7 +12,8 @@ class Candidate(Base):
     __tablename__ = 'candidate'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    party_id = sa.Column(sa.Integer, nullable=False)
+    #party_id = sa.Column(sa.Integer, nullable=False)
+
     fec_id = sa.Column(sa.String(9), index=True)
     district = sa.Column(sa.Integer, nullable=False)
     name_first = sa.Column(sa.String(128), nullable=False)
@@ -53,7 +54,17 @@ class Candidacy(Base):
                                     remote_side='Race.id',
                                     backref='candidacies')
 
+    party_id = sa.Column(sa.Integer, nullable=False, index=True)
+    party = sa.orm.relationship('Party', 
+                                    primaryjoin='Candidacy.party_id==Party.id',
+                                    foreign_keys='Candidacy.party_id',
+                                    remote_side='Party.id',
+                                    backref='candidacies')
+
     candidacy_type = sa.Column(ENUM(u'incumbent', u'challenger'), nullable=False, index=True)
+    candidacy_order = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    slug = sa.Column(sa.String(64), nullable=False)
+
     outcome = sa.Column(ENUM(u'won', u'lost'), nullable=False)
 
     def __repr__(self):
@@ -97,13 +108,16 @@ class Committee(Base):
     __tablename__ = 'committee'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    candidate_id = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    is_candidates = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    
+    #candidate_id = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    #is_candidates = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+
     committee_name = sa.Column(sa.String(128), nullable=False, unique=True)
     committee_slug = sa.Column(sa.String(128), index=True)
     committee_description = sa.Column(sa.Text)
     donations_2015 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
     donations_2016 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    donations_2017 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
 
     candidates = sa.orm.relationship('Candidate',
                                      primaryjoin='Committee.id==candidate_committees.c.committee_id',
@@ -226,13 +240,64 @@ class PoliticalDonation(Base):
 
     id = sa.Column(sa.Integer, primary_key=True)
     is_annonymous = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+
+    #contributor_id = sa.Column(sa.Integer, nullable=False, index=True)
     contributor_id = sa.Column(sa.Integer, nullable=False, index=True)
+    contributor = sa.orm.relationship('Contributor', 
+                                    primaryjoin='PoliticalDonation.contributor_id==Contributor.id',
+                                    foreign_keys='PoliticalDonation.contributor_id',
+                                    remote_side='Contributor.id',
+                                    backref='donations')
+
+    #contributor_type_id = sa.Column(sa.Integer, nullable=False, index=True)
     contributor_type_id = sa.Column(sa.Integer, nullable=False, index=True)
+    contributor_type = sa.orm.relationship('ContributorType', 
+                                    primaryjoin='PoliticalDonation.contributor_type_id==ContributorType.id',
+                                    foreign_keys='PoliticalDonation.contributor_type_id',
+                                    remote_side='ContributorType.id',
+                                    backref='donations')
+
+    #contribution_type_id = sa.Column(sa.Integer, nullable=False, index=True)
     contribution_type_id = sa.Column(sa.Integer, nullable=False, index=True)
+    contribution_type = sa.orm.relationship('PoliticalDonationContributionType', 
+                                    primaryjoin='PoliticalDonation.contribution_type_id==PoliticalDonationContributionType.id',
+                                    foreign_keys='PoliticalDonation.contribution_type_id',
+                                    remote_side='PoliticalDonationContributionType.id',
+                                    backref='donations')
+
+    #committee_id = sa.Column(sa.Integer, nullable=False, index=True)
     committee_id = sa.Column(sa.Integer, nullable=False, index=True)
+    committee = sa.orm.relationship('Committee', 
+                                    primaryjoin='PoliticalDonation.committee_id==Committee.id',
+                                    foreign_keys='PoliticalDonation.committee_id',
+                                    remote_side='Committee.id',
+                                    backref='donations')
+
+
+    #filing_period_id = sa.Column(sa.Integer, nullable=False, index=True)
     filing_period_id = sa.Column(sa.Integer, nullable=False, index=True)
-    employer_name_id = sa.Column(sa.Integer, nullable=False)
-    employer_occupation_id = sa.Column(sa.Integer, nullable=False)
+    filing_period = sa.orm.relationship('PoliticalDonationFilingPeriod', 
+                                    primaryjoin='PoliticalDonation.filing_period_id==PoliticalDonationFilingPeriod.id',
+                                    foreign_keys='PoliticalDonation.filing_period_id',
+                                    remote_side='PoliticalDonationFilingPeriod.id',
+                                    backref='donations')
+
+    #employer_name_id = sa.Column(sa.Integer, nullable=False)
+    employer_name_id = sa.Column(sa.Integer, nullable=False, index=True)
+    employer_name = sa.orm.relationship('PoliticalDonationEmployerName', 
+                                    primaryjoin='PoliticalDonation.employer_name_id==PoliticalDonationEmployerName.id',
+                                    foreign_keys='PoliticalDonation.employer_name_id',
+                                    remote_side='PoliticalDonationEmployerName.id',
+                                    backref='donations')
+
+    #employer_occupation_id = sa.Column(sa.Integer, nullable=False)
+    employer_occupation_id = sa.Column(sa.Integer, nullable=False, index=True)
+    employer_occupation = sa.orm.relationship('PoliticalDonationEmployerOccupation', 
+                                    primaryjoin='PoliticalDonation.employer_occupation_id==PoliticalDonationEmployerOccupation.id',
+                                    foreign_keys='PoliticalDonation.employer_occupation_id',
+                                    remote_side='PoliticalDonationEmployerOccupation.id',
+                                    backref='donations')
+
     donation_date = sa.Column(sa.DateTime, nullable=False, index=True)
     donation_amount = sa.Column(sa.Numeric(10, 2), nullable=False, index=True)
     provided_name = sa.Column(sa.String(128), nullable=False)
