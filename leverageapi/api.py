@@ -103,15 +103,44 @@ def races():
     objs = []
 
     for r in races:
+
+        #donations_2016 = sum([(sum([float(c.donations_2016)]) for c in cands.candidate.committees) for cands in r.candidacies])
+        #donations_2017 = sum([(sum([float(c.donations_2017)]) for c in cands.candidate.committees) for cands in r.candidacies])
+
+        donations_2016 = 0
+        donations_2017 = 0
+        donations_in_philly = 0
+        donations_in_pa = 0
+        donations_out_pa = 0
+
+        for cands in r.candidacies:
+            for c in cands.candidate.committees:
+                #print (c.id, c.donations_2017)
+                donations_2016 += float(c.donations_2016)
+                donations_2017 += float(c.donations_2017)
+                donations_in_philly += float(c.donations_in_philly)
+                donations_in_pa += float(c.donations_in_pa)
+                donations_out_pa += float(c.donations_out_pa)
+
+        donations_2016 = round(donations_2016, 2)
+        donations_2017 = round(donations_2017, 2)
+        donations_in_philly = round(donations_in_philly, 2)
+        donations_in_pa = round(donations_in_pa, 2)
+        donations_out_pa = round(donations_out_pa, 2)
+
+        #donations_2016 = round(sum([float(c.donations_2016) for c in cands.candidate.committees for cands in r.candidacies]), 2)
+        #donations_2017 = round(sum([float(c.donations_2017) for c in cands.candidate.committees for cands in r.candidacies]), 2)
+        #donations_2017 = sum([(float(c.donations_2017) for c in cands.candidate.committees) for cands in r.candidacies])
+        #donations_2017 = 0
+
         race = r.as_dict()
 
         race['num_candidates'] = len(r.candidacies)
-        race['total_money_donated'] = return_amount_donated_from_race_id(r.id)
-        race['total_money_donated'] = 0
-        race['total_money_in_philly'] = 0
-        race['total_money_in_pa'] = 0
-        race['total_money_out_pa'] = 0        
-        race['total_money_spent'] = 0
+        race['total_money_donated'] = donations_2016 + donations_2017
+        race['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
+        race['total_money_in_philly'] = donations_in_philly
+        race['total_money_in_pa'] = donations_in_pa
+        race['total_money_out_pa'] = donations_out_pa 
         race['total_money_spent'] = 0
         race['top_donors'] = {}
 
@@ -184,18 +213,24 @@ def candidates():
 
     for c in candidates:
 
+        donations_2016 = round(float(c.primary_committee().donations_2016), 2)
+        donations_2017 = round(float(c.primary_committee().donations_2017), 2)
+        donations_in_philly = round(float(c.primary_committee().donations_in_philly), 2)
+        donations_in_pa = round(float(c.primary_committee().donations_in_pa), 2)
+        donations_out_pa = round(float(c.primary_committee().donations_out_pa), 2)
+
         candidate = c.as_dict()
 
-        candidate['total_money_donated'] = sum([float(comm.donations_2015) + float(comm.donations_2016) + \
-            float(comm.donations_2017) for comm in c.committees])
-        candidate['total_money_in_philly'] = 0
-        candidate['total_money_in_pa'] = 0
-        candidate['total_money_out_pa'] = 0        
+        candidate['total_money_donated'] = donations_2016 + donations_2017
+        candidate['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
+        candidate['total_money_in_philly'] = donations_in_philly
+        candidate['total_money_in_pa'] = donations_in_pa
+        candidate['total_money_out_pa'] = donations_out_pa     
         candidate['total_money_spent'] = 0
         #candidate['previous_races'] = {}
 
-        for comm in c.committees:
-            print(comm.donations_2015, comm.donations_2016, comm.donations_2017)
+        #for comm in c.committees:
+        #    print(comm.donations_2015, comm.donations_2016, comm.donations_2017)
 
         objs.append(candidate)
 
@@ -261,24 +296,37 @@ def contributions():
     else:
         return return_error('Either race_slug, race_id, candidate_slug, or candidate_id must be sent to candidates endpoint.')
 
+
+    donations_2016 = 0
+    donations_2017 = 0
+    donations_in_philly = 0
+    donations_in_pa = 0
+    donations_out_pa = 0
+
+    for cands in candidates:
+        for c in cands.committees:
+            #print (c.id, c.donations_2017)
+            donations_2016 += round(float(c.donations_2016), 2)
+            donations_2017 += round(float(c.donations_2017), 2)
+            donations_in_philly += round(float(c.donations_in_philly), 2)
+            donations_in_pa += round(float(c.donations_in_pa), 2)
+            donations_out_pa += round(float(c.donations_out_pa), 2)
+
+    donations_in_philly = round(donations_in_philly, 2)
+
     #print (races)
 
     obj = {
-        'total_money_donated': 0,
-        'total_money_in_philly': 0,
-        'total_money_in_pa': 0,
-        'total_money_out_pa': 0,        
+        'total_money_donated': donations_2016 + donations_2017,
+        'total_money_donated_by_year': {2016: donations_2016, 2017: donations_2017},
+        'total_money_in_philly': donations_in_philly,
+        'total_money_in_pa': donations_in_pa,
+        'total_money_out_pa': donations_out_pa,
         'total_money_spent': 0,
         'top_donors': {},
         'donations_by_zipcode': {},
         'donations_by_ward': {}
     }
-
-    for c in candidates:
-        obj['total_money_donated'] += sum([float(comm.donations_2015) + float(comm.donations_2016) + \
-            float(comm.donations_2017) for comm in c.committees])
-
-    obj['total_money_donated'] = round(obj['total_money_donated'], 2)
 
     resp = {}
     resp['metadata'] = {}

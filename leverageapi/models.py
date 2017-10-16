@@ -28,6 +28,10 @@ class Candidate(Base):
 
     def __repr__(self):
         return '<Candidate %r %r>' % (self.name_first, self.name_last)
+
+    def primary_committee(self):
+        #print (self.committees[0].id)
+        return self.committees[0]
     
     def as_dict(self):
         d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -118,6 +122,9 @@ class Committee(Base):
     donations_2015 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
     donations_2016 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
     donations_2017 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    donations_in_philly = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    donations_in_pa = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    donations_out_pa = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
 
     candidates = sa.orm.relationship('Candidate',
                                      primaryjoin='Committee.id==candidate_committees.c.committee_id',
