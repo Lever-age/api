@@ -1,55 +1,4 @@
 
--- SQL TO SHOW DIRTY DATA --
-
--- Ways to misspell Philadelphia (excluding Phillipsburg)
-SELECT city, count(*) AS numc 
-    FROM `contributor_address` 
-    WHERE city LIKE 'Phil%' AND city NOT LIKE '%rg' 
-        AND state = 'PA'
-    GROUP BY city 
-    ORDER BY numc DESC 
-
--- CITIES IN PA OUTSIDE PHILADELPHIA -- 
-SELECT city, count(*) AS numc 
-    FROM `contributor_address` 
-    WHERE NOT (city LIKE 'Phil%' AND city NOT LIKE '%rg')
-        AND state = 'PA'
-    GROUP BY city 
-    ORDER BY numc DESC 
-
--- TEST ABOVE (CITIES IN PA OUTSIDE PHILADELPHIA) TO MAKE SURE IT INCLUDES Philipsburg, PA --
-SELECT city, count(*) AS numc 
-    FROM `contributor_address` 
-    WHERE NOT (city LIKE 'Phil%' AND city NOT LIKE '%rg')
-        AND state = 'PA'
-        AND city LIKE 'Phil%'
-    GROUP BY city 
-    ORDER BY numc DESC 
-
-
--- COMPARE DONATION TOTALS FROM DATES TO TOTALS FROM PLACE -- 
-SELECT id, `donations_2015`+ `donations_2016`+ `donations_2017` AS sumd, `donations_in_pa`+ `donations_out_pa` AS sump 
-    FROM `committee` 
-    WHERE 1 
-    ORDER BY `committee`.`id` ASC 
-
-
-
-# Get candidates missing link to committee in table `candidate_committees`
-SELECT `candidate`.* FROM `candidacy`, `candidate` WHERE `candidacy`.candidate_id = `candidate`.id
-    AND `candidacy`.race_id NOT IN (22, 23, 24)
-    AND `candidate`.id NOT IN (
-        SELECT candidate_id FROM `candidate_committees`
-    )
-
-
-# Extra Committees
-SELECT * FROM `committee` WHERE committee_name LIKE '%Krasner%' 
-SELECT * FROM `committee` WHERE committee_name LIKE '%Tomlinson%' 
-
-
-## Begin Update Cache Fields ## 
-
 -- Set total contributions by year
 
 UPDATE `committee` c
@@ -146,5 +95,3 @@ SET donations_out_pa = (
 UPDATE `committee` c
 SET donations_out_pa = 0 
 WHERE donations_out_pa IS NULL;
-
-## End Update Cache Fields ## 
