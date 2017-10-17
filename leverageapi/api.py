@@ -136,9 +136,10 @@ def races():
         race = r.as_dict()
 
         race['num_candidates'] = len(r.candidacies)
-        race['total_money_donated'] = donations_2016 + donations_2017
+        race['total_money_donated'] = round(donations_2016 + donations_2017, 2)
         race['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
         race['total_money_in_philly'] = donations_in_philly
+        race['total_money_out_philly'] = round(donations_2016 + donations_2017 - donations_in_philly, 2)
         race['total_money_in_pa'] = donations_in_pa
         race['total_money_out_pa'] = donations_out_pa 
         race['total_money_spent'] = 0
@@ -221,9 +222,10 @@ def candidates():
 
         candidate = c.as_dict()
 
-        candidate['total_money_donated'] = donations_2016 + donations_2017
+        candidate['total_money_donated'] = round(donations_2016 + donations_2017, 2)
         candidate['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
         candidate['total_money_in_philly'] = donations_in_philly
+        candidate['total_money_out_philly'] = round(donations_2016 + donations_2017 - donations_in_philly , 2) 
         candidate['total_money_in_pa'] = donations_in_pa
         candidate['total_money_out_pa'] = donations_out_pa     
         candidate['total_money_spent'] = 0
@@ -317,9 +319,10 @@ def contributions():
     #print (races)
 
     obj = {
-        'total_money_donated': donations_2016 + donations_2017,
+        'total_money_donated': round(donations_2016 + donations_2017, 2),
         'total_money_donated_by_year': {2016: donations_2016, 2017: donations_2017},
         'total_money_in_philly': donations_in_philly,
+        'total_money_out_philly': round(donations_2016 + donations_2017 - donations_in_philly, 2),
         'total_money_in_pa': donations_in_pa,
         'total_money_out_pa': donations_out_pa,
         'total_money_spent': 0,
