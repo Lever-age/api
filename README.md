@@ -17,7 +17,7 @@ Initially copied from Illinois Sunshine.
 * [libpostal](https://github.com/openvenues/libpostal)
 
 ## Optional: Use a Docker container:
-[Docker container compose file](https://github.com/lottspot/leverage-devbackend) courtesy of @lottspot.
+[Docker environment on GitHub](https://github.com/Lever-age/leverage-devbackend) courtesy of @lottspot.
 
 **Install app requirements**
 
