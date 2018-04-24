@@ -35,7 +35,15 @@ SELECT id, `donations_2015`+ `donations_2016`+ `donations_2017` AS sumd, `donati
 
 
 
-# Get candidates missing link to committee in table `candidate_committees`
+-- SQL TO REMEMBER --
+
+-- Distinct zipcodes in Philly
+SELECT DISTINCT `zipcode` 
+    FROM `contributor_address` 
+    WHERE city LIKE 'Phil%' AND city NOT LIKE '%rg' AND state = 'PA' 
+
+
+-- Get candidates missing link to committee in table `candidate_committees`
 SELECT `candidate`.* FROM `candidacy`, `candidate` WHERE `candidacy`.candidate_id = `candidate`.id
     AND `candidacy`.race_id NOT IN (22, 23, 24)
     AND `candidate`.id NOT IN (
@@ -43,9 +51,21 @@ SELECT `candidate`.* FROM `candidacy`, `candidate` WHERE `candidacy`.candidate_i
     )
 
 
-# Extra Committees
+-- Extra Committees
+SELECT * FROM `committee` WHERE committee_name LIKE '%Kenn%' 
 SELECT * FROM `committee` WHERE committee_name LIKE '%Krasner%' 
 SELECT * FROM `committee` WHERE committee_name LIKE '%Tomlinson%' 
+
+
+-- Get donors for a given committeee
+SELECT c.* FROM `political_donation` d,
+    `contributor` c, 
+    `contributor_address` a
+WHERE d.contributor_id = c.id 
+    AND c.address_id = a.id 
+    AND d.committee_id = 1098
+    AND d.contribution_type_id IN (20, 23, 25, 26, 27, 28)
+ORDER BY c.id
 
 
 ## Begin Update Cache Fields ## 

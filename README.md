@@ -14,7 +14,6 @@ Initially copied from Illinois Sunshine.
   + Fedora 26/CentOS 7: `mariadb-devel` package
   + OpenSUSE Leap 42.3: `libmysqlclient-devel` package
   + OS X Sierra: `mysql` homebrew formula
-* [libpostal](https://github.com/openvenues/libpostal)
 
 ## Optional: Use a Docker container:
 [Docker environment on GitHub](https://github.com/Lever-age/leverage-devbackend) courtesy of @lottspot.
