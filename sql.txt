@@ -1,4 +1,96 @@
 
+-- Slugs -- 
+
+-- https://gist.github.com/jareis/847e7e1523e4ea8f8676
+
+DELIMITER ;;
+
+DROP FUNCTION IF EXISTS `slugify`;;
+CREATE FUNCTION `slugify`(dirty_string varchar(255)) RETURNS varchar(255) CHARSET utf8
+    DETERMINISTIC
+BEGIN
+    DECLARE x, y , z , k INT;
+    DECLARE temp_string, new_string, accents, noAccents VARCHAR(255);
+    DECLARE is_allowed BOOL;
+    DECLARE c, check_char VARCHAR(1);
+
+    -- IF NULL DO NOT PROCEED
+    If dirty_string IS NULL Then
+        return dirty_string;
+    End If;
+
+    set temp_string = LOWER(dirty_string);
+
+    -- REPLACE ACCENTS
+    -- WITH CAPS
+    -- set accents = 'ŠšŽžÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝŸÞàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿþƒ';
+    -- set noAccents = 'SsZzAAAAAAACEEEEIIIINOOOOOOUUUUYYBaaaaaaaceeeeiiiinoooooouuuuyybf';
+    -- ONLY SMALL CAPS
+    set accents = 'šžàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿþƒ';
+    set noAccents = 'szaaaaaaaceeeeiiiinoooooouuuuyybf';
+    set k = CHAR_LENGTH(accents);
+
+    while k > 0 do
+        set temp_string = REPLACE(temp_string, SUBSTRING(accents, k, 1), SUBSTRING(noAccents, k, 1));
+        set k = k - 1;
+    end while;
+
+    -- CONVERT & TO EMPTY SPACE
+    Set temp_string = REPLACE(temp_string, '&', '');
+
+    -- REPLACE ALL UNWANTED CHARS
+    Select temp_string REGEXP('[^a-z0-9\-]+') into x;
+    If x = 1 then
+        set z = 1;
+        set k = CHAR_LENGTH(temp_string);
+        While z <= k Do
+            Set c = SUBSTRING(temp_string, z, 1);
+            Set is_allowed = FALSE;
+            If !((ascii(c) = 45) or (ascii(c) >= 48 and ascii(c) <= 57) or (ascii(c) >= 97 and ascii(c) <= 122)) Then
+                Set temp_string = REPLACE(temp_string, c, '-');
+            End If;
+            set z = z + 1;
+        End While;
+    End If;
+
+    Select temp_string REGEXP("^-|-$|'") into x;
+    If x = 1 Then
+        Set temp_string = Replace(temp_string, "'", '');
+        Set z = CHAR_LENGTH(temp_string);
+        Set y = CHAR_LENGTH(temp_string);
+        Dash_check: While z > 1 Do
+            If STRCMP(SUBSTRING(temp_string, -1, 1), '-') = 0 Then
+                Set temp_string = SUBSTRING(temp_string,1, y-1);
+                Set y = y - 1;
+            Else
+                Leave Dash_check;
+            End If;
+            Set z = z - 1;
+        End While;
+    End If;
+
+    Repeat
+        Select temp_string REGEXP("--") into x;
+        If x = 1 Then
+            Set temp_string = REPLACE(temp_string, "--", "-");
+        End If;
+    Until x <> 1 End Repeat;
+
+    If LOCATE('-', temp_string) = 1 Then
+        Set temp_string = SUBSTRING(temp_string, 2);
+    End If;
+
+    Return temp_string;
+END;;
+
+DELIMITER ;
+
+update race set slug = slugify(CONCAT(race_name, ' ', race_district));
+
+update candidate set slug = slugify(CONCAT(name_first, ' ', name_middle, ' ', name_last, ' ', name_suffix));
+
+
+
 -- SQL TO SHOW DIRTY DATA --
 
 -- Ways to misspell Philadelphia (excluding Phillipsburg)

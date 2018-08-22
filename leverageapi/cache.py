@@ -1,5 +1,5 @@
 from flask import request
-from flask.ext.cache import Cache
+from flask_caching import Cache
 from leverageapi.app_config import CACHE_CONFIG
 
 def make_cache_key(*args, **kwargs):
