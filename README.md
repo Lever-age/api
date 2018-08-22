@@ -29,9 +29,14 @@ mkdir leverage
 cd leverage
 git clone https://github.com/Lever-age/api.git
 cd api
-virtualenv venv
+python3 -m virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+You also need to create your own app_config.py file:
+
+```bash
 cp leverageapi/app_config.py.example leverageapi/app_config.py
 ```
 
@@ -55,18 +60,17 @@ For now, load the mysql files from the datadump directory. Load the tables.sql f
 python runserver.py
 ```
 
-* /api/races (same as /api/races?election_type=general&election_year=2017)
-* /api/races?election_type=primary&election_year=2015
-* /api/races?race_id=27
-* /api/races?race_slug=district-attorney
+* /api/races (same as /api/races?election_type=general&election_year=2018)
+* /api/races?race_id=2
+* /api/races?race_slug=governor
 
-* /api/candidates?race_id=27
-* /api/candidates?race_slug=district-attorney
-* /api/candidates?candidate_id=47
-* /api/candidates?candidate_slug=lawrence-krasner
+* /api/candidates?race_id=2
+* /api/candidates?race_slug=governor
+* /api/candidates?candidate_id=4
+* /api/candidates?candidate_slug=thomas-w-wolf
 
-* /api/contributions?candidate_slug=lawrence-krasner
-* /api/contributions?race_slug=district-attorney
+* /api/contributions?candidate_slug=thomas-w-wolf
+* /api/contributions?race_slug=governor
 
 ## Illinois Sunshine DB instructions:
 

@@ -69,7 +69,7 @@ class Candidacy(Base):
     candidacy_order = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     slug = sa.Column(sa.String(64), nullable=False)
 
-    outcome = sa.Column(ENUM(u'won', u'lost'), nullable=False)
+    outcome = sa.Column(sa.Enum(u'won', u'lost', u'upcoming'), nullable=False)
 
     def __repr__(self):
         return '<Candidacy %r %r, (%r %r)>' % (self.candidate.name_first, 

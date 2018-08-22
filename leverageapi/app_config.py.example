@@ -17,7 +17,7 @@ DB_CONN='mysql+mysqldb://{0}:{1}@{2}:{3}/{4}?charset=utf8'\
         .format(DB_USER, DB_PW, DB_HOST, DB_PORT, DB_NAME)
 
 DEFAULT_RACE = 'general'
-DEFAULT_YEAR = 2017
+DEFAULT_YEAR = 2018
 
 SECRET_KEY = 'super secret key'
 
