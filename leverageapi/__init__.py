@@ -28,12 +28,21 @@ def create_app():
     app.register_blueprint(views)
     app.register_blueprint(api, url_prefix='/api')
     cache.init_app(app)
+
+    #print(app.config)
+
+    # Set CORS
+    if 'CORS' in app.config and app.config['CORS'] != '':
+        print('Adding CORS:',  app.config['CORS'])
+        from flask_cors import CORS
+        CORS(app, resources={r"/*": {"origins": app.config['CORS']}})
     
     if sentry:
         sentry.init_app(app)
     
     @app.errorhandler(404)
     def page_not_found(e):
+        print('Error:', e)
         app.logger.info(traceback.format_exc())
         if sentry:
             sentry.captureException()
@@ -41,6 +50,7 @@ def create_app():
 
     @app.errorhandler(Exception)
     def error(e):
+        print('Error:', e)
         app.logger.info(traceback.format_exc())
         if sentry:
             sentry.captureException()
