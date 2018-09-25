@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, abort, request, make_response, red
 from leverageapi.database import db_session
 #from leverageapi.models import Candidate, Committee, Receipt, FiledDoc, Expenditure, D2Report
 from leverageapi.cache import cache, make_cache_key, CACHE_TIMEOUT
-from leverageapi.app_config import FLUSH_KEY
+from leverageapi.app_config import FLUSH_KEY, API_BASE_URL
 import sqlalchemy as sa
 import json
 """
@@ -18,8 +18,6 @@ import os
 import requests
 
 views = Blueprint('views', __name__)
-
-API_BASE_URL = 'http://127.0.0.1:5050/api/'
 
 @views.route('/')
 @cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
