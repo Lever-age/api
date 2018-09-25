@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <!--
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+{% block extra_css %}{% endblock %}
+     -->
+
+    <title>{% block head_title %}Leverage{% endblock %}</title>
+
+<link rel="import" href="https://fonts.googleapis.com/css?family=Proxima+Nova">
+
+  <style>
+    body {font-family: Roboto, sans-serif;}
+  </style>
+
+
+  </head>
+
+  <body>
+
+{% block content %}{% endblock %}
+
+
+    <footer class="container">
+      <div style="float:left">{% block copy_title %}{% endblock %}</div><div style="float:right">&copy; Leverage 2018</div>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!--
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+{% block extra_js %}{% endblock %}
+     -->
+
+  </body>
+</html>

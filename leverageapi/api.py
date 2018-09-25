@@ -223,7 +223,8 @@ def candidates():
         candidate = c.as_dict()
 
         candidate['total_money_donated'] = round(donations_2016 + donations_2017, 2)
-        candidate['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
+        #candidate['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
+        candidate['donations_by_year'] = c.aggregate_committee_cache_values_dict('donations_by_year')
         candidate['total_money_in_philly'] = donations_in_philly
         candidate['total_money_out_philly'] = round(donations_2016 + donations_2017 - donations_in_philly , 2) 
         candidate['total_money_in_pa'] = donations_in_pa
