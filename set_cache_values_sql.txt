@@ -1,0 +1,113 @@
+-- -----------------------------------------
+-- Set Candidate total contributions by year
+-- -----------------------------------------
+
+-- Total
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'donations_by_year'
+        AND breakdown_2 = 'total';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm
+    WHERE d.committee_id = comm.id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2018 
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'donations_by_year'
+        AND breakdown_2 = '2018';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'donations_by_year', '2018', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm
+    WHERE d.committee_id = comm.id
+        AND d.donation_date > '2017-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2017
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'donations_by_year'
+        AND breakdown_2 = '2017';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'donations_by_year', '2017', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm
+    WHERE d.committee_id = comm.id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2018-01-01'
+    GROUP BY d.`committee_id`;
+
+
+
+
+-- -----------------------------------------
+-- Set Race total contributions by year
+-- -----------------------------------------
+
+-- Total
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'race'
+        AND breakdown_1 = 'donations_by_year'
+        AND breakdown_2 = 'total';
+
+INSERT INTO `value_cache`
+    SELECT NULL, candidacy.race_id, 'race', 'donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cc, `candidate` cand, candidacy
+    WHERE d.committee_id = comm.id
+        AND comm.id = cc.committee_id
+        AND cc.candidate_id = cand.id
+        AND cand.id = candidacy.candidate_id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY `candidacy`.`race_id`;
+
+-- -- 2018 
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'race'
+        AND breakdown_1 = 'donations_by_year'
+        AND breakdown_2 = '2018';
+
+INSERT INTO `value_cache`
+    SELECT NULL, candidacy.race_id, 'race', 'donations_by_year', '2018', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cc, `candidate` cand, candidacy
+    WHERE d.committee_id = comm.id
+        AND comm.id = cc.committee_id
+        AND cc.candidate_id = cand.id
+        AND cand.id = candidacy.candidate_id
+        AND d.donation_date > '2017-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY `candidacy`.`race_id`;
+
+-- -- 2017
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'race'
+        AND breakdown_1 = 'donations_by_year'
+        AND breakdown_2 = '2017';
+
+INSERT INTO `value_cache`
+    SELECT NULL, candidacy.race_id, 'race', 'donations_by_year', '2017', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cc, `candidate` cand, candidacy
+    WHERE d.committee_id = comm.id
+        AND comm.id = cc.committee_id
+        AND cc.candidate_id = cand.id
+        AND cand.id = candidacy.candidate_id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2018-01-01'
+    GROUP BY `candidacy`.`race_id`;
+
+
+
+
