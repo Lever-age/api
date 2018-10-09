@@ -1,5 +1,5 @@
 -- -----------------------------------------
--- Set Candidate total contributions by year
+-- Set Committee total contributions by year
 -- -----------------------------------------
 
 -- Total
@@ -46,6 +46,302 @@ INSERT INTO `value_cache`
         AND d.donation_date > '2016-12-31'
         AND d.donation_date < '2018-01-01'
     GROUP BY d.`committee_id`;
+
+
+
+-- -----------------------------------------
+-- Set Committee in-district contributions by year for State House races
+-- -----------------------------------------
+
+-- Total
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'in_district_donations_by_year'
+        AND breakdown_2 = 'total';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
+            `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
+    WHERE d.committee_id = comm.id
+        AND comm.id = cand_comm.committee_id
+        AND cand_comm.candidate_id = cand.id
+        AND cand.id = `candidacy`.candidate_id
+        AND `candidacy`.race_id = `race`.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = `cicero_district`.id
+        AND `race`.race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY'
+        AND `cicero_district`.district_type = 'STATE_LOWER'
+        AND `race`.race_district = `cicero_district`.district_id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2018 
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'in_district_donations_by_year'
+        AND breakdown_2 = '2018';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
+            `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
+    WHERE d.committee_id = comm.id
+        AND comm.id = cand_comm.committee_id
+        AND cand_comm.candidate_id = cand.id
+        AND cand.id = `candidacy`.candidate_id
+        AND `candidacy`.race_id = `race`.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = `cicero_district`.id
+        AND `race`.race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY'
+        AND `cicero_district`.district_type = 'STATE_LOWER'
+        AND `race`.race_district = `cicero_district`.district_id
+        AND d.donation_date > '2017-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2017
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'in_district_donations_by_year'
+        AND breakdown_2 = '2017';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
+            `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
+    WHERE d.committee_id = comm.id
+        AND comm.id = cand_comm.committee_id
+        AND cand_comm.candidate_id = cand.id
+        AND cand.id = `candidacy`.candidate_id
+        AND `candidacy`.race_id = `race`.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = `cicero_district`.id
+        AND `race`.race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY'
+        AND `cicero_district`.district_type = 'STATE_LOWER'
+        AND `race`.race_district = `cicero_district`.district_id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2018-01-01'
+    GROUP BY d.`committee_id`;
+
+
+
+-- -----------------------------------------
+-- Set Committee in-district contributions by year for State Senate races
+-- -----------------------------------------
+
+-- Total
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
+            `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
+    WHERE d.committee_id = comm.id
+        AND comm.id = cand_comm.committee_id
+        AND cand_comm.candidate_id = cand.id
+        AND cand.id = `candidacy`.candidate_id
+        AND `candidacy`.race_id = `race`.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = `cicero_district`.id
+        AND `race`.race_name = 'SENATOR IN THE GENERAL ASSEMBLY'
+        AND `cicero_district`.district_type = 'STATE_UPPER'
+        AND `race`.race_district = `cicero_district`.district_id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2018 
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
+            `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
+    WHERE d.committee_id = comm.id
+        AND comm.id = cand_comm.committee_id
+        AND cand_comm.candidate_id = cand.id
+        AND cand.id = `candidacy`.candidate_id
+        AND `candidacy`.race_id = `race`.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = `cicero_district`.id
+        AND `race`.race_name = 'SENATOR IN THE GENERAL ASSEMBLY'
+        AND `cicero_district`.district_type = 'STATE_UPPER'
+        AND `race`.race_district = `cicero_district`.district_id
+        AND d.donation_date > '2017-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2017
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
+            `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
+    WHERE d.committee_id = comm.id
+        AND comm.id = cand_comm.committee_id
+        AND cand_comm.candidate_id = cand.id
+        AND cand.id = `candidacy`.candidate_id
+        AND `candidacy`.race_id = `race`.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = `cicero_district`.id
+        AND `race`.race_name = 'SENATOR IN THE GENERAL ASSEMBLY'
+        AND `cicero_district`.district_type = 'STATE_UPPER'
+        AND `race`.race_district = `cicero_district`.district_id
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2018-01-01'
+    GROUP BY d.`committee_id`;
+
+
+
+-- -----------------------------------------
+-- Set Committee in-pa contributions by year
+-- -----------------------------------------
+
+-- Total
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'in_pa_donations_by_year'
+        AND breakdown_2 = 'total';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `contributor`, `contributor_address`
+    WHERE d.committee_id = comm.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.state = 'pa'
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2018 
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'in_pa_donations_by_year'
+        AND breakdown_2 = '2018';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `contributor`, `contributor_address`
+    WHERE d.committee_id = comm.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.state = 'pa'
+        AND d.donation_date > '2017-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2017
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'in_pa_donations_by_year'
+        AND breakdown_2 = '2017';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `contributor`, `contributor_address`
+    WHERE d.committee_id = comm.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.state = 'pa'
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2018-01-01'
+    GROUP BY d.`committee_id`;
+
+
+-- -----------------------------------------
+-- Set Committee out-of-pa contributions by year
+-- -----------------------------------------
+
+-- Total
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'out_of_pa_donations_by_year'
+        AND breakdown_2 = 'total';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `contributor`, `contributor_address`
+    WHERE d.committee_id = comm.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.state != 'pa'
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2018 
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'out_of_pa_donations_by_year'
+        AND breakdown_2 = '2018';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `contributor`, `contributor_address`
+    WHERE d.committee_id = comm.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.state != 'pa'
+        AND d.donation_date > '2017-12-31'
+        AND d.donation_date < '2019-01-01'
+    GROUP BY d.`committee_id`;
+
+-- -- 2017
+
+DELETE FROM `value_cache` 
+    WHERE object_name = 'committee'
+        AND breakdown_1 = 'out_of_pa_donations_by_year'
+        AND breakdown_2 = '2017';
+
+INSERT INTO `value_cache`
+    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+        FROM political_donation d, committee comm, `contributor`, `contributor_address`
+    WHERE d.committee_id = comm.id
+        AND d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.state != 'pa'
+        AND d.donation_date > '2016-12-31'
+        AND d.donation_date < '2018-01-01'
+    GROUP BY d.`committee_id`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
