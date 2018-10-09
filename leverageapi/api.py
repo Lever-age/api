@@ -137,7 +137,8 @@ def races():
 
         race['num_candidates'] = len(r.candidacies)
         race['total_money_donated'] = round(donations_2016 + donations_2017, 2)
-        race['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
+        #race['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
+        race['donations_by_year'] = r.aggregate_race_cache_values_dict('donations_by_year')
         race['total_money_in_philly'] = donations_in_philly
         race['total_money_out_philly'] = round(donations_2016 + donations_2017 - donations_in_philly, 2)
         race['total_money_in_pa'] = donations_in_pa
@@ -225,6 +226,11 @@ def candidates():
         candidate['total_money_donated'] = round(donations_2016 + donations_2017, 2)
         #candidate['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
         candidate['donations_by_year'] = c.aggregate_committee_cache_values_dict('donations_by_year')
+        
+        candidate['in_district_donations_by_year'] = c.aggregate_committee_cache_values_dict('in_district_donations_by_year')
+        candidate['in_pa_donations_by_year'] = c.aggregate_committee_cache_values_dict('in_pa_donations_by_year')
+        candidate['out_of_pa_donations_by_year'] = c.aggregate_committee_cache_values_dict('out_of_pa_donations_by_year')
+
         candidate['total_money_in_philly'] = donations_in_philly
         candidate['total_money_out_philly'] = round(donations_2016 + donations_2017 - donations_in_philly , 2) 
         candidate['total_money_in_pa'] = donations_in_pa

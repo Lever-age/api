@@ -88,7 +88,7 @@ DELETE FROM `value_cache`
         AND breakdown_2 = '2018';
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', '2018', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
             `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
     WHERE d.committee_id = comm.id
@@ -115,7 +115,7 @@ DELETE FROM `value_cache`
         AND breakdown_2 = '2017';
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', '2017', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
             `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
     WHERE d.committee_id = comm.id
@@ -165,7 +165,7 @@ INSERT INTO `value_cache`
 -- -- 2018 
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', '2018', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
             `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
     WHERE d.committee_id = comm.id
@@ -187,7 +187,7 @@ INSERT INTO `value_cache`
 -- -- 2017
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'in_district_donations_by_year', '2017', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, 
             `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`
     WHERE d.committee_id = comm.id
@@ -238,7 +238,7 @@ DELETE FROM `value_cache`
         AND breakdown_2 = '2018';
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', '2018', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `contributor`, `contributor_address`
     WHERE d.committee_id = comm.id
         AND d.contributor_id = `contributor`.id
@@ -256,7 +256,7 @@ DELETE FROM `value_cache`
         AND breakdown_2 = '2017';
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'in_pa_donations_by_year', '2017', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `contributor`, `contributor_address`
     WHERE d.committee_id = comm.id
         AND d.contributor_id = `contributor`.id
@@ -297,7 +297,7 @@ DELETE FROM `value_cache`
         AND breakdown_2 = '2018';
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', '2018', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `contributor`, `contributor_address`
     WHERE d.committee_id = comm.id
         AND d.contributor_id = `contributor`.id
@@ -315,7 +315,7 @@ DELETE FROM `value_cache`
         AND breakdown_2 = '2017';
 
 INSERT INTO `value_cache`
-    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', 'total', '', SUM(d.donation_amount)
+    SELECT NULL, comm.id, 'committee', 'out_of_pa_donations_by_year', '2017', '', SUM(d.donation_amount)
         FROM political_donation d, committee comm, `contributor`, `contributor_address`
     WHERE d.committee_id = comm.id
         AND d.contributor_id = `contributor`.id

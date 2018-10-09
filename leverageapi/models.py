@@ -425,6 +425,17 @@ class Race(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+    def get_value_cache(self):
+        return db_session.query(ValueCache).filter(ValueCache.object_name=='race').filter(ValueCache.object_id==self.id)
+
+    def aggregate_race_cache_values_dict(self, breakdown_1):
+        return_dict = {}
+        for cache in self.get_value_cache():
+            if cache.breakdown_1 == breakdown_1:
+                if cache.breakdown_2 not in return_dict:
+                    return_dict[cache.breakdown_2] = 0
+                return_dict[cache.breakdown_2] += round(float(cache.value), 2)
+        return return_dict
 
 """
 
