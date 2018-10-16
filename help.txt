@@ -1,0 +1,152 @@
+
+
+mysqldump leverage_philly -u root -p > sql/leverage_philly.sql
+
+
+
+-- # Contributors like WAWA
+SELECT * FROM `contributor` WHERE `name_business` like '%wawa%' 
+
+-- # All WAWA addresses:
+SELECT * FROM `contributor_address` where id in (SELECT address_id FROM `contributor` WHERE `name_business` like '%wawa%' ) 
+
+-- # WAWA contribution count
+SELECT c.id, count(*) as numc FROM `contributor` c, political_donation d 
+WHERE c.id = d.contributor_id AND c.`name_business` like '%wawa%' 
+GROUP BY c.id
+
+-- # WAWA contributions
+SELECT c.id as c_id, d.* FROM `contributor` c, political_donation d 
+WHERE c.id = d.contributor_id AND c.`name_business` like '%wawa%' 
+
+
+
+-- # Sheetz
+SELECT c.id as c_id, d.* FROM `contributor` c, political_donation d WHERE c.id = d.contributor_id AND c.`name_business` like '%sheetz%' 
+
+
+
+-- # Top committees by amount donated
+SELECT c.id, c.committee_name, SUM(d.donation_amount) AS total_amount 
+FROM `committee` c, political_donation d 
+WHERE c.id = d.committee_id
+GROUP BY c.id
+ORDER BY total_amount DESC
+
+
+-- # ALSO Top committees by amount donated -- But using cache table
+SELECT c.id, c.committee_name, vc.value AS total_amount 
+FROM `committee` c, `value_cache` vc
+WHERE c.id = vc.object_id AND vc.object_name = 'committee' 
+    AND vc.breakdown_1 = 'donations_by_year' AND vc.breakdown_2 = 'total'
+ORDER BY total_amount DESC
+
+
+-- # Top candidates by amount donated -- But using cache table
+SELECT c.id, c.committee_name, cand.slug, vc.value AS total_amount 
+FROM `committee` c, `value_cache` vc, `candidate_committees` cc, `candidate` cand
+WHERE c.id = vc.object_id AND vc.object_name = 'committee' 
+    AND c.id = cc.committee_id
+    AND cc.candidate_id = cand.id
+    AND vc.breakdown_1 = 'donations_by_year' AND vc.breakdown_2 = 'total'
+ORDER BY total_amount DESC
+
+
+-- # Top candidates by amount donated -- with race -- But using cache table
+SELECT c.id, c.committee_name, cand.slug, r.race_name, r.race_district, vc.value AS total_amount 
+FROM `committee` c, `value_cache` vc, `candidate_committees` cc, `candidate` cand, candidacy, race r
+WHERE c.id = vc.object_id AND vc.object_name = 'committee' 
+    AND c.id = cc.committee_id
+    AND cc.candidate_id = cand.id
+    AND cand.id = candidacy.candidate_id
+    AND candidacy.race_id = r.id
+    AND vc.breakdown_1 = 'donations_by_year' AND vc.breakdown_2 = 'total'
+ORDER BY total_amount DESC
+
+
+-- # Donations by State House district 
+SELECT cd.district_type, cd.district_id, SUM(d.donation_amount) AS district_amount 
+FROM `cicero_district` cd, `contributor_address_cicero_district_set` ad_set, `contributor_address`, 
+    `contributor`, political_donation d
+WHERE d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = cd.id
+        AND cd.district_type = 'STATE_LOWER'
+        AND d.committee_id = 4639
+GROUP BY cd.district_type, cd.district_id
+ORDER BY district_amount DESC
+
+
+-- # Top donors by committee id
+SELECT c.*, SUM(d.donation_amount) as total_amount FROM `contributor` c, political_donation d 
+WHERE c.id = d.contributor_id AND c.is_business = 1 
+    AND d.committee_id = 4639
+GROUP BY c.id
+ORDER BY total_amount DESC
+
+
+-- # Top candidates by amount received in district -- But using cache table
+SELECT DISTINCT cand.*, race.race_description, party.party_name,
+    vc1.value AS total_amount, vc2.value AS in_district_amount, (vc2.value/vc1.value) AS percent_in_district
+FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, party,
+    `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
+    `value_cache` vc1, `value_cache` vc2
+WHERE d.committee_id = comm.id
+    AND comm.id = cand_comm.committee_id
+    AND cand_comm.candidate_id = cand.id
+    AND cand.id = `candidacy`.candidate_id
+    AND `candidacy`.race_id = `race`.id
+    AND d.contributor_id = `contributor`.id
+    AND `contributor`.address_id = `contributor_address`.id
+    AND `contributor_address`.id = ad_set.address_id
+    AND ad_set.cicero_district_id = `cicero_district`.id
+    AND `candidacy`.party_id = party.id
+    AND `race`.race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY'
+    AND `cicero_district`.district_type = 'STATE_LOWER'
+    AND `race`.race_district = `cicero_district`.district_id
+    AND comm.id = vc1.object_id AND vc1.object_name = 'committee' 
+    AND vc1.breakdown_1 = 'donations_by_year' AND vc1.breakdown_2 = 'total'
+    AND comm.id = vc2.object_id AND vc2.object_name = 'committee' 
+    AND vc2.breakdown_1 = 'in_district_donations_by_year' AND vc2.breakdown_2 = 'total'
+ORDER BY percent_in_district DESC
+
+
+
+-- # Fix business names
+UPDATE `contributor` c, political_donation d 
+SET c.name_business = UPPER(d.provided_name)
+WHERE c.id = d.contributor_id AND c.is_business = 1 
+
+
+
+# race.race_name
+# SELECT distinct `race_name` FROM `race` WHERE 1 
+REPRESENTATIVE IN THE GENERAL ASSEMBLY
+SENATOR IN THE GENERAL ASSEMBLY
+
+# cicero_district.district_type
+# SELECT distinct `district_type` FROM `cicero_district` WHERE state = 'PA'
+# SELECT * FROM `cicero_district` WHERE state = 'PA' AND `district_type` = 'STATE_LOWER'
+STATE_UPPER
+STATE_LOWER
+
+
+
+
+
+
+# Test CORS
+
+function test_cors() {
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            alert(this.responseText);
+        }
+    };
+    xmlhttp.open("GET", "https://leverage-api.enactprojects.com/api/races?race_slug=governor", true);
+    xmlhttp.send(); 
+
+}

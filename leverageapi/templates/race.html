@@ -4,7 +4,7 @@
 
 {% block head_title %}Race: {{ race['race_name'] }}{% if race['race_district'] %} - {{ race['race_district'] }}{% endif %}{% endblock %}
 
-{% block copy_title %}{{ api_url }}{% endblock %}
+{% block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock %}
 
 {% block content %}
 

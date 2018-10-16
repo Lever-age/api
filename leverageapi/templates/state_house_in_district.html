@@ -13,9 +13,10 @@
         <div class="col-lg">
 
             <h1>Details for {{ candidate['name_first'] }} {{ candidate['name_last'] }}</h1>
+            <h3>Top Business Donors</h3>
             <ul>
-{% for key in candidate %}
-              <li>{{ key }}: {{ candidate[key] }}</li>{% endfor %}
+{% for donor in top_biz_donors %}
+              <li>{{ donor.name_business }}: {{ donor.num_donations }} donations totaling ${{ donor.total_amount }}</li>{% endfor %}
             </ul>
 
         </div>

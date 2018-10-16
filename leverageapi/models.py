@@ -36,17 +36,31 @@ class Candidate(Base):
     def as_dict(self):
         d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         d['candidacies'] = [c.as_dict() for c in self.candidacies]
+        d['committees'] = [c.as_dict_light() for c in self.committees]
         return d
 
-    def aggregate_committee_cache_values_dict(self, breakdown_1):
+    def cache_value_amounts_dict(self):
         return_dict = {}
         for c in self.committees:
-            for cache in c.get_value_cache():
+            for cache in c.get_cache_value_amount():
+                if cache.breakdown_1 not in return_dict:
+                    return_dict[cache.breakdown_1] = {}
+                if cache.breakdown_2 not in return_dict[cache.breakdown_1]:
+                    return_dict[cache.breakdown_1][cache.breakdown_2] = 0
+                return_dict[cache.breakdown_1][cache.breakdown_2] += round(float(cache.value), 2)
+        return return_dict
+
+    """
+    def aggregate_committee_cache_value_amounts_dict(self, breakdown_1):
+        return_dict = {}
+        for c in self.committees:
+            for cache in c.get_cache_value_amount():
                 if cache.breakdown_1 == breakdown_1:
                     if cache.breakdown_2 not in return_dict:
                         return_dict[cache.breakdown_2] = 0
                     return_dict[cache.breakdown_2] += round(float(cache.value), 2)
         return return_dict
+    """
 
 
 
@@ -130,12 +144,12 @@ class Committee(Base):
     committee_name = sa.Column(sa.String(128), nullable=False, unique=True)
     committee_slug = sa.Column(sa.String(128), index=True)
     committee_description = sa.Column(sa.Text)
-    donations_2015 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
-    donations_2016 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
-    donations_2017 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
-    donations_in_philly = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
-    donations_in_pa = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
-    donations_out_pa = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    #donations_2015 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    #donations_2016 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    #donations_2017 = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    #donations_in_philly = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    #donations_in_pa = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
+    #donations_out_pa = sa.Column(sa.Numeric(10, 2), server_default=sa.text("'0.00'"))
 
     candidates = sa.orm.relationship('Candidate',
                                      primaryjoin='Committee.id==candidate_committees.c.committee_id',
@@ -149,24 +163,29 @@ class Committee(Base):
     def as_dict(self):
         d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         d['candidates'] = [o.as_dict() for o in self.candidates]
+        return d
 
-    def get_value_cache(self):
-        return db_session.query(ValueCache).filter(ValueCache.object_name=='committee').filter(ValueCache.object_id==self.id)
+    def as_dict_light(self):
+        d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return d
+
+    def get_cache_value_amount(self):
+        return db_session.query(CacheValueAmount).filter(CacheValueAmount.object_name=='committee').filter(CacheValueAmount.object_id==self.id)
 
 
 
-class ValueCache(Base):
-    __tablename__ = 'value_cache'
+class CacheValueAmount(Base):
+    __tablename__ = 'cache_value_amount'
 
     id = sa.Column(sa.Integer, primary_key=True)
 
     """
     committee_id = sa.Column(sa.Integer, nullable=False, index=True)
     committee = sa.orm.relationship('Committee', 
-                                    primaryjoin='CommitteeValueCache.committee_id==Committee.id',
-                                    foreign_keys='CommitteeValueCache.committee_id',
+                                    primaryjoin='CommitteeCacheValueAmount.committee_id==Committee.id',
+                                    foreign_keys='CommitteeCacheValueAmount.committee_id',
                                     remote_side='Committee.id',
-                                    backref='value_cache')
+                                    backref='cache_value_amounts')
     """
     object_id = sa.Column(sa.Integer, nullable=False, index=True)
     object_name = sa.Column(sa.String(32), nullable=False, server_default=sa.text("''"))
@@ -177,11 +196,12 @@ class ValueCache(Base):
     value = sa.Column(sa.String(32), nullable=False, server_default=sa.text("''"))
 
     def __repr__(self):
-        return '<ValueCache %r>' % self.object_name
+        return '<CacheValueAmount %r>' % self.object_name
 
     def as_dict(self):
         d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         #d['candidates'] = [o.as_dict() for o in self.candidates]
+        return d
 
     """
     def get_object(self):
@@ -210,8 +230,8 @@ class ContributorAddres(Base):
     state = sa.Column(sa.String(32), nullable=False, server_default=sa.text("''"))
     zipcode = sa.Column(sa.String(16), nullable=False, index=True, server_default=sa.text("''"))
     slug = sa.Column(sa.String(64), unique=True)
-    num_individual_contribs = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    num_non_individual_contribs = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    #num_individual_contribs = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    #num_non_individual_contribs = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
 
     def __repr__(self):
         return '<ContributorAddres %r %r>' % (self.id, self.addr1)
@@ -257,10 +277,10 @@ class Contributor(Base):
     slug = sa.Column(sa.String(64), unique=True)
     is_person = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     is_business = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    num_contributions = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    num_committees_contrib_to = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
-    total_contributed_2015 = sa.Column(sa.Numeric(12, 2))
-    total_contributed_2016 = sa.Column(sa.Numeric(12, 2))
+    #num_contributions = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    #num_committees_contrib_to = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    #total_contributed_2015 = sa.Column(sa.Numeric(12, 2))
+    #total_contributed_2016 = sa.Column(sa.Numeric(12, 2))
 
     def __repr__(self):
         return '<Contributor %r %r>' % (self.name_first, 
@@ -412,7 +432,7 @@ class Race(Base):
     race_name = sa.Column(sa.String(64), nullable=False, index=True)
     race_district = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     race_description = sa.Column(sa.Text)
-    num_candidates = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    #num_candidates = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     parties_short_text = sa.Column(sa.String(16), nullable=False, server_default=sa.text("''"))
     slug = sa.Column(sa.String(48), nullable=False)
     is_statewide = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
@@ -425,17 +445,47 @@ class Race(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-    def get_value_cache(self):
-        return db_session.query(ValueCache).filter(ValueCache.object_name=='race').filter(ValueCache.object_id==self.id)
+    def get_cache_value_amount(self):
+        return db_session.query(CacheValueAmount).filter(CacheValueAmount.object_name=='race').filter(CacheValueAmount.object_id==self.id)
 
-    def aggregate_race_cache_values_dict(self, breakdown_1):
+    def cache_value_amounts_dict(self):
         return_dict = {}
-        for cache in self.get_value_cache():
+        for cache in self.get_cache_value_amount():
+            if cache.breakdown_1 not in return_dict:
+                return_dict[cache.breakdown_1] = {}
+            if cache.breakdown_2 not in return_dict[cache.breakdown_1]:
+                return_dict[cache.breakdown_1][cache.breakdown_2] = 0
+            return_dict[cache.breakdown_1][cache.breakdown_2] += round(float(cache.value), 2)
+        return return_dict
+
+    def sum_committee_cache_value_amounts_dict(self):
+        return_dict = {}
+        for candidacy in self.candidacies:
+            #for candidate in candidacy.candidates:
+            for c in candidacy.candidate.committees:
+                for cache in c.get_cache_value_amount():
+                    if cache.breakdown_1 not in return_dict:
+                        return_dict[cache.breakdown_1] = {}
+                    if cache.breakdown_2 not in return_dict[cache.breakdown_1]:
+                        return_dict[cache.breakdown_1][cache.breakdown_2] = 0
+                    return_dict[cache.breakdown_1][cache.breakdown_2] += float(cache.value)
+
+        for b1 in return_dict:
+            for b2 in return_dict[b1]:
+                return_dict[b1][b2] = round(return_dict[b1][b2], 2)
+
+        return return_dict
+
+    """
+    def aggregate_race_cache_value_amounts_dict(self, breakdown_1):
+        return_dict = {}
+        for cache in self.get_cache_value_amount():
             if cache.breakdown_1 == breakdown_1:
                 if cache.breakdown_2 not in return_dict:
                     return_dict[cache.breakdown_2] = 0
                 return_dict[cache.breakdown_2] += round(float(cache.value), 2)
         return return_dict
+    """
 
 """
 
