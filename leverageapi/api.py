@@ -137,8 +137,10 @@ def races():
 
         race = r.as_dict()
 
-        race['cache_values'] = r.sum_committee_cache_value_amounts_dict()
-
+        cache_values = r.sum_committee_cache_value_amounts_dict()
+        
+        for breakdown1 in cache_values:
+            race[breakdown1] = cache_values[breakdown1]
 
         race['num_candidates'] = len(r.candidacies)
         #race['total_money_donated'] = round(donations_2016 + donations_2017, 2)
@@ -232,7 +234,11 @@ def candidates():
 
         #candidate['total_money_donated'] = round(donations_2016 + donations_2017, 2)
 
-        candidate['cache_values'] = c.cache_value_amounts_dict()
+        cache_values = c.cache_value_amounts_dict()
+
+        for breakdown1 in cache_values:
+            candidate[breakdown1] = cache_values[breakdown1]
+
 
         #candidate['total_money_donated_by_year'] = {2016: donations_2016, 2017: donations_2017}
 
