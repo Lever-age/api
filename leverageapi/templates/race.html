@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{# import 'macros_form.html' as form_macros #}
+
+{% block head_title %}Race: {{ race['race_name'] }}{% if race['race_district'] %} - {{ race['race_district'] }}{% endif %}{% endblock %}
+
+{% block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+            <h1>{{ race['race_name'] }}{% if race['race_district'] %} - {{ race['race_district'] }}{% endif %}</h1>
+            <ul>
+{% for key in race %}
+              <li>{{ key }}: {{ race[key] }}</li>{% endfor %}
+            </ul>
+
+            <p>{{ api_url_race }}</p>
+
+            <h2>Candidates</h2>
+            <ul>
+{% for candidate in candidates %}
+              <li><a href="{{ url_for('.candidate', candidate_slug=candidate['slug']) }}">{{ candidate['name_first'] }} {{ candidate['name_last'] }}</a></li>{% endfor %}
+            </ul>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

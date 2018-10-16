@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+
+{% block head_title %}GA views by state{% endblock %}
+
+{% block copy_title %}
+    Title Placeholder
+{% endblock %}
+
+
+{% block extra_css %}
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+        crossorigin="anonymous"></script>
+
+
+    <!-- Load Leaflet from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+    crossorigin=""></script>
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js"
+    integrity="sha512-ECQqaYZke9cSdqlFG08zSkudgrdF6I1d8ViSa7I3VIszJyVqw4ng1G8sehEXlumdMnFYfzY0tMgdQa4WCs9IUw=="
+    crossorigin=""></script>
+
+    <!-- load the latest release from the cdn automatically -->
+<script src="https://unpkg.com/esri-leaflet-vector"></script>
+
+    <style>
+        #mapid_1 { 
+            width: 1300px;
+            height: 750px; 
+            float: right;
+        }
+        .info { 
+            padding: 6px 8px; 
+            font: 14px/16px Arial, Helvetica, sans-serif; 
+            background: white; 
+            background: rgba(255,255,255,0.8); 
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+            border-radius: 5px; 
+        } 
+        .info h4 { 
+            margin: 0 0 5px; 
+            color: #777; 
+        }
+        .legend { 
+            text-align: left; 
+            line-height: 18px; 
+            color: #555;
+        }
+        .legend i { 
+            width: 18px; 
+            height: 18px; 
+            float: left;
+            margin-right: 8px; 
+            opacity: 0.7;
+        }
+    </style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+
+
+            <div id="mapid_1"></div>
+
+<script>
+
+    //alert(max_pv_per_100000);
+
+    var max_donation_amount = 0;
+    //var max_pv_per_100000 = 0;
+    var min_pv_per_100000 = 0;
+
+
+
+    var zipcode_map = L.map('mapid_1').setView([41.00, -77.51], 8);
+
+    var layer = L.esri.basemapLayer('Gray').addTo(zipcode_map);
+
+
+    // control that shows state info on hover
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info');
+        this.update();
+        return this._div;
+    };
+
+    info.update = function (props) {
+        //this._div.innerHTML = '<h4>donation_amount by state</h4>' +  (props ?
+        //    '<b>' + props.donation_amount + ' from a population of ' + props.population + ' for ' + props.pv_per_100000 + ' donation_amount per 100,000 in ' + props.name + '</b><br />'
+        //    : 'Hover over a state');
+        this._div.innerHTML = '<h4>Donations by state house district</h4>' +  (props ?
+            '<b>' + props.donation_amount + ' donated in ' + props.District_N + '</b><br />'
+            : 'Hover over a district');    };
+
+    info.addTo(zipcode_map);
+
+    function mapRound(x){
+        //return Math.ceil(x / 100.0) * 100
+        return (Math.round(x * 100) / 100).toFixed(2)
+    }
+
+    // get color depending on population density value
+    /*
+    function getColor(d) {
+        return d > mapRound(0.90*max_pv_per_100000) ? '#800026' :
+                //d > mapRound(0.75*max_pv_per_100000)  ? '#BD0026' :
+                d > mapRound(0.65*max_pv_per_100000)  ? '#E31A1C' :
+                //d > mapRound(0.45*max_pv_per_100000)  ? '#FC4E2A' :
+                d > mapRound(0.40*max_pv_per_100000)   ? '#FD8D3C' :
+                //d > mapRound(0.15*max_pv_per_100000)   ? '#FEB24C' :
+                d > mapRound(0.15*max_pv_per_100000)   ? '#FED976' :
+                d > 1   ? '#FFEDA0' :
+
+                            '#FFFFFF';
+    }*/
+
+    function getColor(d) {
+        //console.log('getColor type: '+typeof(d))
+        d = Number(d)
+        //console.log('getting color for: '+d)
+        /*
+#b2182b
+#d6604d
+#f4a582
+#fddbc7
+#f7f7f7
+#d1e5f0
+#92c5de
+#4393c3
+#2166ac
+        */
+        if (min_pv_per_100000 > 0) {
+            min_pv_per_100000 = 0;
+        }
+        //if (d >= 0) {
+        if (d > mapRound(0.75*max_donation_amount)){
+            return_code = '#2166ac' ;
+
+        } else if (d > mapRound(0.5*max_donation_amount)) {
+            return_code = '#4393c3' ;
+
+        } else if (d > mapRound(0.25*max_donation_amount)) {
+            return_code = '#92c5de' ;
+
+        } else if (d > 0) {
+            return_code = '#d1e5f0' ;
+
+        } else if (d == 0) {
+            return_code = '#f7f7f7' ;
+
+        } else if (d > mapRound(0.25*min_pv_per_100000)) {
+            return_code = '#fddbc7' ;
+
+        } else if (d > mapRound(0.50*min_pv_per_100000)) {
+            return_code = '#f4a582' ;
+
+        } else if (d > mapRound(0.75*min_pv_per_100000)) {
+            return_code = '#d6604d' ;
+
+        } else {
+            return_code = '#b2182b' ;
+
+        }
+
+        //console.log('returning: '+return_code+' for: '+d+'. max_pv_per_100000: '+max_pv_per_100000+', min_pv_per_100000: '+min_pv_per_100000)
+
+        return return_code
+
+    }    
+
+    function style(feature) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: getColor(feature.properties.donation_amount)
+        };
+    }
+
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+
+        info.update(layer.feature.properties);
+    }
+
+    var geojson;
+
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+        info.update();
+    }
+
+    function zoomToFeature(e) {
+        zipcode_map.fitBounds(e.target.getBounds());
+    }
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            //click: zoomToFeature
+        });
+    }
+
+
+
+
+
+
+    zipcode_map.attributionControl.addAttribution('&copy; <a href="#">Leverage</a>');
+
+
+    var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            //grades = [0, mapRound(0.05*max_pv_per_100000), mapRound(0.15*max_pv_per_100000), mapRound(0.30*max_pv_per_100000), mapRound(0.45*max_pv_per_100000), mapRound(0.60*max_pv_per_100000), mapRound(0.75*max_pv_per_100000), mapRound(0.90*max_pv_per_100000)],
+            grades = [mapRound(0.01*max_donation_amount), mapRound(0.40*max_donation_amount), mapRound(0.65*max_donation_amount), mapRound(0.90*max_donation_amount)],
+
+            labels = [],
+            from, to;
+
+        for (var i = 0; i < grades.length; i++) {
+            from = grades[i];
+            to = grades[i + 1];
+
+            labels.push(
+                '<i style="background:' + getColor(from + 1) + '"></i> ' +
+                from + (to ? '&ndash;' + to : '+'));
+        }
+
+        div.innerHTML = labels.join('<br>');
+        return div;
+    };
+
+
+</script>
+
+
+
+<script>
+
+
+
+$(document).ready(function() {
+
+
+    //alert( 'hi there dude.' );
+
+    //var combined_data = 'hi'
+
+    // Pull in zipcode data
+    $.getJSON( "/static/House2012Final_tiny.json", function() {
+            //console.log( "success" );
+        })
+        .done(function( district_data ) {
+            //console.log( "second success" );
+
+            //console.log(district_data)
+
+            // Pull in donation data by zipcode
+            $.getJSON( "{{ api_url }}", function() {
+                    //console.log( "success 2" );
+                })
+                .done(function( donation_data ) {
+                    //console.log( "second success 2" );
+
+                    //console.log(donation_data)
+
+                    //alert( combined_data );
+
+                    for (i in district_data.features) {
+
+                        //console.log(district_data.features[i])
+
+                        // "name":"19962","zipcode":19962,"num_contrib":"8","total_amount":"3400.00"
+
+                        district_data.features[i].properties.name = district_data.features[i].properties.District_N;
+                        //district_data.features[i].properties.zipcode = district_data.features[i].properties.NAME;
+                        district_data.features[i].properties.donation_amount = 0;
+                        district_data.features[i].properties.population = 0;
+                        district_data.features[i].properties.pv_per_100000 = 0;
+
+                        if (district_data.features[i].properties.District_N in donation_data['data']) {
+                            //console.log('found: '+district_data.features[i].properties.DISTRICT)
+
+                            key = district_data.features[i].properties.District_N
+                            district_data.features[i].properties.donation_amount = Number(donation_data['data'][key].donation_amount);
+                            console.log('key: '+key+ ' & donation_amount: '+district_data.features[i].properties.donation_amount)
+                            //district_data.features[i].properties.population = Number(parseInt(donation_data[key].population));
+                            //district_data.features[i].properties.pv_per_100000 = Number(parseFloat(donation_data[key].pv_per_100000)).toFixed(2);
+
+                            if ( max_donation_amount < district_data.features[i].properties.donation_amount ) {
+                                max_donation_amount = district_data.features[i].properties.donation_amount;
+                                console.log('new max: '+max_donation_amount)
+                            }
+
+                            //console.log('curr: '+max_pv_per_100000+ ' & test: '+district_data.features[i].properties.pv_per_100000)
+                            //console.log(typeof(max_pv_per_100000))
+                            //console.log(typeof(district_data.features[i].properties.pv_per_100000))
+
+                            // Javascript doesn't like decimal notation ...
+                            //if ( parseInt(max_pv_per_100000) < parseInt(donation_data[key].pv_per_100000) ) {
+                            //     max_pv_per_100000 = donation_data[key].pv_per_100000;
+                            //}
+                            //if ( max_pv_per_100000 < Number(district_data.features[i].properties.pv_per_100000) ) {
+                            //     max_pv_per_100000 = Number(district_data.features[i].properties.pv_per_100000);
+                            //}
+                        }
+                        else {
+                            //console.log('missing: '+district_data.features[i].properties.DISTRICT)
+                            district_data.features[i].properties.donation_amount = 0;
+                        }
+                    }
+
+                    //alert(max_pv_per_100000);
+
+                    geojson = L.geoJson(district_data, {
+                        style: style,
+                        onEachFeature: onEachFeature
+                    }).addTo(zipcode_map);
+
+
+
+
+                    legend.addTo(zipcode_map);
+
+
+
+
+                })
+                .fail(function() {
+                    console.log( "error 2" );
+                })
+                .always(function() {
+                    //console.log( "getJSON().always() 2" );
+                });
+            // End Pull in donation data by zipcode
+
+
+
+
+        })
+        .fail(function() {
+            console.log( "error" );
+        })
+        .always(function() {
+            //console.log( "getJSON().always()" );
+        });
+ 
+
+    // alert( 'by dude' );
+
+
+} );
+
+
+
+</script>
+
+
+        
+
+
+
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}

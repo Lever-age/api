@@ -19,6 +19,11 @@ DB_CONN='mysql+mysqldb://{0}:{1}@{2}:{3}/{4}?charset=utf8'\
 DEFAULT_RACE = 'general'
 DEFAULT_YEAR = 2018
 
+# Set to domains allowed to access API
+CORS = ''
+
+API_BASE_URL = 'http://127.0.0.1:5050/api/'
+
 SECRET_KEY = 'super secret key'
 
 FTP_HOST = 'ftp.elections.il.gov'

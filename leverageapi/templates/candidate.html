@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{# import 'macros_form.html' as form_macros #}
+
+{% block head_title %}Candidate: {{ candidate['name_first'] }} {{ candidate['name_last'] }}{% endblock %}
+
+{% block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+
+            <h1>Details for {{ candidate['name_first'] }} {{ candidate['name_last'] }}</h1>
+            <ul>
+{% for key in candidate %}
+              <li>{{ key }}: {{ candidate[key] }}</li>{% endfor %}
+            </ul>
+
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

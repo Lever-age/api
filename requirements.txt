@@ -5,6 +5,7 @@ Flask-Bcrypt==0.7.1
 Flask-Login==0.4.1
 Flask-WTF==0.14.2
 Flask-Caching==1.4.0
+Flask-Cors==3.0.6
 Jinja2==2.10
 #psycopg2==2.6
 python-dateutil==2.7.3

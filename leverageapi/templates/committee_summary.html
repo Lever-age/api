@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{# import 'macros_form.html' as form_macros #}
+
+{% block head_title %}Committee: {{ committee.committee_name }}{% endblock %}
+
+{% block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+
+            <h1>Details for {{ committee['committee_name'] }}</h1>
+            <h3>Top Business Donors</h3>
+            <ul>
+{% for donor in top_biz_donors %}
+              <li>{{ donor.name_business }}: {{ donor.num_donations }} donations totaling ${{ donor.total_amount }}</li>{% endfor %}
+            </ul>
+
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
