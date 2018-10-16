@@ -103,8 +103,9 @@ class Candidacy(Base):
                                                self.race.election_type)
     
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
+        d = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        d['party'] = self.party.as_dict()
+        return d
 
 candidate_committees = sa.Table('candidate_committees', Base.metadata,
                        sa.Column('candidate_id', sa.Integer),
