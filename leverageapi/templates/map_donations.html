@@ -78,6 +78,8 @@
 
 <script>
 
+    var property_name = '{{ property_name }}'
+
     //alert(max_pv_per_100000);
 
     var max_value = 0;
@@ -109,7 +111,7 @@
         //    '<b>' + props.donation_amount + ' from a population of ' + props.population + ' for ' + props.pv_per_100000 + ' donation_amount per 100,000 in ' + props.name + '</b><br />'
         //    : 'Hover over a state');
         this._div.innerHTML = '<h4>Donations by state house district</h4>' +  (props ?
-            '<b>' + props.donation_amount + ' donated in ' + props.District_N + '</b><br />'
+            '<b>' + props.donation_amount + ' donated in ' + props[property_name] + '</b><br />'
             : 'Hover over a district');    };
 
     info.addTo(zipcode_map);
@@ -333,16 +335,16 @@ $(document).ready(function() {
 
                         // "name":"19962","zipcode":19962,"num_contrib":"8","total_amount":"3400.00"
 
-                        district_data.features[i].properties.name = district_data.features[i].properties.District_N;
+                        district_data.features[i].properties.name = district_data.features[i].properties[property_name];
                         //district_data.features[i].properties.zipcode = district_data.features[i].properties.NAME;
                         district_data.features[i].properties.donation_amount = 0;
                         district_data.features[i].properties.population = 0;
                         district_data.features[i].properties.pv_per_100000 = 0;
 
-                        if (district_data.features[i].properties.District_N in donation_data['data']) {
+                        if (district_data.features[i].properties[property_name] in donation_data['data']) {
                             //console.log('found: '+district_data.features[i].properties.DISTRICT)
 
-                            key = district_data.features[i].properties.District_N
+                            key = district_data.features[i].properties[property_name]
                             mapping_value = Number(donation_data['data'][key].donation_amount);
                             mapping_values_array.push(mapping_value);
                             district_data.features[i].properties.donation_amount = mapping_value;

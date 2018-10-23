@@ -410,3 +410,79 @@ ORDER BY district_amount DESC""".format(committee_id)
     return response
 
 
+
+@api.route('/donations_by_state_senate_district/<committee_id>', methods=['GET'])
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def donations_by_state_senate_district(committee_id):
+
+    sql_query = """SELECT cd.district_type, cd.district_id, SUM(d.donation_amount) AS district_amount 
+FROM `cicero_district` cd, `contributor_address_cicero_district_set` ad_set, `contributor_address`, 
+    `contributor`, political_donation d
+WHERE d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND `contributor_address`.id = ad_set.address_id
+        AND ad_set.cicero_district_id = cd.id
+        AND cd.district_type = 'STATE_UPPER'
+        AND d.committee_id = {}
+GROUP BY cd.district_type, cd.district_id
+ORDER BY district_amount DESC""".format(committee_id)
+
+    results = db_session.execute(sql_query)
+    
+    result_dict = {} 
+
+    for r in results:
+        print(r)
+        result_dict[r.district_id] = {'district': r.district_id, 'donation_amount': round(float(r.district_amount), 2)}
+
+
+    resp = {}
+    resp['metadata'] = {}
+    resp['data'] = result_dict
+
+    response_str = json.dumps(resp, sort_keys=False, default=dthandler)
+    response = make_response(response_str, 200)
+    response.headers['Content-Type'] = 'application/json'
+    # response.headers['Access-Control-Allow-Origin'] = '*'
+
+    return response
+
+
+
+@api.route('/donations_by_zipcode/<committee_id>', methods=['GET'])
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def donations_by_zipcode(committee_id):
+
+    sql_query = """SELECT `contributor_address`.zipcode, SUM(d.donation_amount) AS zipcode_amount 
+FROM  `contributor_address`, `contributor`, political_donation d
+WHERE d.contributor_id = `contributor`.id
+        AND `contributor`.address_id = `contributor_address`.id
+        AND d.committee_id = {}
+GROUP BY `contributor_address`.zipcode
+ORDER BY zipcode_amount DESC""".format(committee_id)
+
+    results = db_session.execute(sql_query)
+    
+    result_dict = {} 
+
+    for r in results:
+        print(r)
+        result_dict[r.zipcode] = {'zipcode': r.zipcode, 'donation_amount': round(float(r.zipcode_amount), 2)}
+
+
+    resp = {}
+    resp['metadata'] = {}
+    resp['data'] = result_dict
+
+    response_str = json.dumps(resp, sort_keys=False, default=dthandler)
+    response = make_response(response_str, 200)
+    response.headers['Content-Type'] = 'application/json'
+    # response.headers['Access-Control-Allow-Origin'] = '*'
+
+    return response
+
+
+
+
+
+
