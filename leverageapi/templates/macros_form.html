@@ -1,0 +1,125 @@
+
+{% macro in_district_form(action_url, districts) -%}
+
+    <form class="bd-search d-flex align-items-center" method="GET" action="{{ action_url }}">
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+
+
+          <div class="row">
+            <div class="col-12 col-md-8">
+
+              <label for="look-at">Party:</label>
+              <select name="look_at" id="look_at">
+                <option value="overall">Overall Donations</option>
+                <option value="in_district"{% if session['filter']['look_at'] == 'in_district' %} selected{% endif %}>In-District Donations</option>
+                <!--<option value="in_pa"{% if session['filter']['look_at'] == 'in_pa' %} selected{% endif %}>In-PA Donations</option>-->
+              </select>
+
+            </div>
+
+            <div class="col-6 col-md-4">&nbsp;</div>
+
+          </div> <!-- /row -->
+
+              <label for="party">Party:</label>
+              <select name="party" id="party">
+                <option value="0">All</option>
+                <option value="1"{% if session['filter']['party'] == 1 %} selected{% endif %}>Democratic</option>
+                <option value="2"{% if session['filter']['party'] == 2 %} selected{% endif %}>Republican</option>
+              </select>
+
+            </div>
+
+            <div class="col-6 col-md-4">&nbsp;</div>
+
+          </div> <!-- /row -->
+
+          <div class="row">
+            <div class="col-12 col-md-8">
+
+              <label for="party">District:</label>
+              <select name="district" id="district">
+                <option value="0">All</option>
+{% for district in districts %}
+                <option value="{{ district }}"{% if district == session['filter']['district'] %} selected{% endif %}>{{ district }}</option>{% endfor %}
+              </select>
+
+            </div>
+
+            <div class="col-6 col-md-4">&nbsp;</div>
+
+          </div> <!-- /row -->
+
+          {#####################
+
+          <div class="row">
+            <div class="col-12 col-md-8">
+
+              <label for="min-total">Min Total:</label>
+              <input type="text" name="min_total" id="min-total" placeholder="Min. Total Donations" value="{{ session['filter']['min_total'] }}"/>
+
+            </div>
+
+            <div class="col-6 col-md-4">&nbsp;</div>
+
+          </div> <!-- /row -->
+
+
+          <div class="row">
+            <div class="col-12 col-md-8">
+
+              <label for="max-total">Max Total:</label>
+              <input type="text" name="max_total" id="max-total" placeholder="Max Total Donations" value="{{ session['filter']['max_total'] }}"/>
+
+            </div>
+
+            <div class="col-6 col-md-4">&nbsp;</div>
+
+          </div> <!-- /row -->
+
+          #####################}
+
+          <div class="row">
+            <div class="col-12 col-md-8">
+
+              <label for="num-candidates">Num Candidates in Race:</label>
+              <select name="num_candidates" id="num-candidates">
+                <option value="0">All</option>
+                <option value="1"{% if session['filter']['num_candidates'] == 1 %} selected{% endif %}>1</option>
+                <option value="2"{% if session['filter']['num_candidates'] == 2 %} selected{% endif %}>2</option>
+              </select>
+            </div>
+
+            <div class="col-6 col-md-4">&nbsp;</div>
+
+          </div> <!-- /row -->
+
+
+
+
+          <!-- Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop -->
+          <div class="row">
+            <div class="col-6 col-md-4"><input type="submit" value="Update" /></div>
+            <div class="col-6 col-md-4">&nbsp;</div>
+            <div class="col-6 col-md-4">&nbsp;</div>
+          </div> <!-- /row -->
+
+          <div class="row">
+            &nbsp;
+          </div> <!-- /row -->
+
+
+          <div class="row">
+            &nbsp;
+          </div> <!-- /row -->
+
+        </div>
+      </div>
+    </div>
+    </form>
+
+{%- endmacro %}
+

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{# import 'macros_form.html' as form_macros #}
+{% import 'macros_form.html' as form_macros %}
 
-{% block head_title %}Top State House Candidates by In-District Donations{% endblock %}
+{% block head_title %}Top {{ candidate_type }} Candidates by {{ session['filter']['look_at_display'] }} Donations{% endblock %}
 
 {# block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock #}
 
@@ -22,16 +22,17 @@
   $(document).ready(function() {
       $('#in-district-donations').DataTable(
       {
-        "order": [[ 5, "desc" ]],
+        "order": [[ 4, "desc" ]],
         "pageLength": 10,
         "lengthMenu": [ 10, 25, 50, 100, 250 ],
+        "scrollX": true,
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
                     //return '$'+data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     return '$'+formatMoney(data)
                 },
-                "targets": [ 3, 4 ]
+                "targets": [ 4, 5 ]
             }
         ]
       } 
@@ -43,20 +44,31 @@
 
 {% block content %}
 
+    {{ form_macros.in_district_form(action_url, districts ) }}
+
     <div class="container">
       <div class="row">
         <div class="col-lg">
 
-            <h1>Top State House Candidates by In-District Donations</h1>
+            <h2>{{ description }}:</h2>
+
+            <p>On average, candidates received <b>{{ avg_count_of_donations }}</b> donations of <b>{{ avg_donation }}</b> each for an average total of <b>{{ avg_amount }}</b>. The median total donated is <b>{{ median_amount }}</b>.</p>
+
+            <!--<p>Within their district, candidates received an average of <b>{{ avg_count_of_in_district_donations }}</b> donations of <b>{{ avg_in_district_donation }}</b> each for an average total of <b>{{ avg_in_dist_amount }}</b>. The median total donated in district is <b>{{ median_in_dist_amount }}</b>.</p>
+
+            <p>This means the average percentage of donors who live in the candidate's district is <b>{{ percent_count_in_district }}%</b> and their donations accounted for <b>{{ percent_amount_in_district }}%</b> of the total amount donated.</p>-->
+
+            <h1>Top {{ candidate_type }} Candidates by {{ session['filter']['look_at_display'] }} Donations</h1>
+
             <table id="in-district-donations" class="display" style="width:100%">
               <thead>
                   <tr>
                       <th>Name</th>
                       <th>District</th>
                       <th>Party</th>
-                      <th>In-District</th>
-                      <th>Total</th>
-                      <th>% In-Distrct</th>
+                      <th>Num. Donations</th>
+                      <th>Total Donated</th>
+                      <th>Avg. Donation</th>
                   </tr>
               </thead>
               <tbody>
@@ -65,9 +77,9 @@
                       <td>{{ c['name_first'] }} {{ c['name_last'] }}</td>
                       <td>{{ c['district'] }}</td>
                       <td>{{ c['party_name'] }}</td>
-                      <td style="text-align:right">{{ c['in_district_amount'] }}</td>
+                      <td style="text-align:right">{{ c['count_donations'] }}</td>
                       <td style="text-align:right">{{ c['total_amount'] }}</td>
-                      <td>{{ c['percent_in_district'] }}</td>
+                      <td>{{ c['avg_donation'] }}</td>
                   </tr>{% endfor %}
               </tbody>
             </table>

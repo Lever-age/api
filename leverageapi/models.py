@@ -433,7 +433,7 @@ class Race(Base):
     race_name = sa.Column(sa.String(64), nullable=False, index=True)
     race_district = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     race_description = sa.Column(sa.Text)
-    #num_candidates = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
+    num_candidates = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))
     parties_short_text = sa.Column(sa.String(16), nullable=False, server_default=sa.text("''"))
     slug = sa.Column(sa.String(48), nullable=False)
     is_statewide = sa.Column(sa.Integer, nullable=False, server_default=sa.text("'0'"))

@@ -1,7 +1,6 @@
-from flask import Blueprint, render_template, abort, request, make_response, redirect, \
-    session as flask_session, g
+from flask import Blueprint, render_template, abort, request, make_response, redirect, session, g
 from leverageapi.database import db_session
-from leverageapi.models import Candidate, Committee
+from leverageapi.models import Candidate, Committee, Party
 from leverageapi.cache import cache, make_cache_key, CACHE_TIMEOUT
 from leverageapi.app_config import FLUSH_KEY, API_BASE_URL
 import sqlalchemy as sa
@@ -159,16 +158,364 @@ LIMIT 10""".format(committee_id)
     return render_template('committee_summary.html', committee=committee, top_biz_donors=top_biz_donors)
 
 
+
+
+@views.before_request
+def before_request():
+
+    session['filter'] = {}
+
+    if 'look_at' in request.args:
+        #print ('Found segment')
+        session['filter']['look_at'] = request.args['look_at']
+    else:
+        session['filter']['look_at'] = 'overall'
+
+    session['filter']['look_at_display'] = ' '.join(session['filter']['look_at'].split('_')).title().replace(' Pa', ' PA')
+
+    if 'party' in request.args:
+        #print ('Found segment')
+        session['filter']['party'] = int(request.args['party'])
+    else:
+        session['filter']['party'] = 0
+
+    if 'district' in request.args:
+        #print ('Found segment')
+        session['filter']['district'] = int(request.args['district'])
+    else:
+        session['filter']['district'] = 0
+
+    if 'min_total' in request.args:
+        #print ('Found segment')
+        session['filter']['min_total'] = request.args['min_total']
+    else:
+        session['filter']['min_total'] = ''
+
+    if 'max_total' in request.args:
+        #print ('Found segment')
+        session['filter']['max_total'] = request.args['max_total']
+    else:
+        session['filter']['max_total'] = ''
+
+    if 'num_candidates' in request.args:
+        #print ('Found segment')
+        session['filter']['num_candidates'] = int(request.args['num_candidates'])
+    else:
+        session['filter']['num_candidates'] = 0
+
+def my_median(a_list):
+    my_list = a_list.copy()
+    my_list.sort()
+    if (len(my_list) % 2) != 0:
+        middle_index = len(my_list)//2
+        return my_list[middle_index]
+    else:
+        larger_index = len(my_list)//2
+        smaller_index = larger_index - 1
+        return (my_list[larger_index] + my_list[smaller_index]) / 2
+        
+
+"""
+    sql_query = ""SELECT DISTINCT cand.*, race.race_description, party.party_name,
+    vc1.value AS total_amount, vc2.value AS total_in_district_amount, (vc2.value/vc1.value) AS percent_in_district, 
+    vc3.value AS count_donations, vc4.value AS count_donations_in_district, (vc4.value/vc3.value) AS percent_count_in_district, 
+    vc5.value AS total_in_pa_amount, vc6.value AS count_donations_in_pa, (vc5.value/vc1.value) AS percent_in_pa,
+    (vc6.value/vc3.value) AS percent_count_in_pa
+FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, party,
+    `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
+    `cache_value_amount` vc1, `cache_value_amount` vc2, `cache_value_amount` vc3, `cache_value_amount` vc4, 
+    `cache_value_amount` vc5, `cache_value_amount` vc6
+WHERE d.committee_id = comm.id
+    AND comm.id = cand_comm.committee_id
+    AND cand_comm.candidate_id = cand.id
+    AND cand.id = `candidacy`.candidate_id
+    AND `candidacy`.race_id = `race`.id
+    AND d.contributor_id = `contributor`.id
+    AND `contributor`.address_id = `contributor_address`.id
+    AND `contributor_address`.id = ad_set.address_id
+    AND ad_set.cicero_district_id = `cicero_district`.id
+    AND `candidacy`.party_id = party.id
+    AND `race`.race_name = '{}'
+    AND `cicero_district`.district_type = '{}'
+    AND `race`.race_district = `cicero_district`.district_id
+    AND comm.id = vc1.object_id AND vc1.object_name = 'committee' 
+    AND vc1.breakdown_1 = 'donations_by_year' AND vc1.breakdown_2 = 'total'
+    AND comm.id = vc2.object_id AND vc2.object_name = 'committee' 
+    AND vc2.breakdown_1 = 'in_district_donations_by_year' AND vc2.breakdown_2 = 'total'
+
+    AND comm.id = vc3.object_id AND vc3.object_name = 'committee' 
+    AND vc3.breakdown_1 = 'count_donations_by_year' AND vc3.breakdown_2 = 'total'
+
+    AND comm.id = vc4.object_id AND vc4.object_name = 'committee' 
+    AND vc4.breakdown_1 = 'in_district_count_donations_by_year' AND vc4.breakdown_2 = 'total'
+
+    AND comm.id = vc5.object_id AND vc5.object_name = 'committee' 
+    AND vc5.breakdown_1 = 'in_pa_donations_by_year' AND vc5.breakdown_2 = 'total'
+
+    AND comm.id = vc6.object_id AND vc6.object_name = 'committee' 
+    AND vc6.breakdown_1 = 'in_pa_count_donations_by_year' AND vc6.breakdown_2 = 'total'
+
+    AND {}
+    ORDER BY percent_in_district DESC"".format(race_race_name, cicero_district_type, ' AND '.join(additional_where_sql_list))
+"""
+
+def donation_table(candidate_type, race_race_name, cicero_district_type, districts, action_url):
+
+    additional_where_sql_list = ['1']
+
+    description = 'Basic stats for PARTY candidates running for the PA State Senate NUM_CANDS'
+
+    if session['filter']['party'] > 0:
+        additional_where_sql_list.append('`candidacy`.party_id = {}'.format(session['filter']['party']))
+        party = db_session.query(Party).get(session['filter']['party'])
+        description = description.replace('PARTY', party.party_name)
+    else:
+        description = description.replace('PARTY', 'all')
+
+    if session['filter']['min_total']:
+        additional_where_sql_list.append('d.party_id = {}'.format(session['filter']['min_total']))
+
+    if session['filter']['max_total']:
+        additional_where_sql_list.append('d.party_id = {}'.format(session['filter']['max_total']))
+
+    if session['filter']['num_candidates'] > 0:
+        additional_where_sql_list.append('`race`.num_candidates = {}'.format(session['filter']['num_candidates']))
+        if session['filter']['num_candidates'] == 1:
+            description = description.replace('NUM_CANDS', 'where only one candidate is running')
+        else:
+            description = description.replace('NUM_CANDS', 'where {} candidates are running'.format(session['filter']['num_candidates']))
+    else:
+        description = description.replace('NUM_CANDS', '')
+
+    if session['filter']['district'] > 0:
+        additional_where_sql_list.append('`race`.race_district = {}'.format(session['filter']['district']))
+        description = description.replace('DISTRCT', 'in district number {}'.format(session['filter']['district']))
+
+    else:
+        description = description.replace('DISTRCT', '')
+
+    description = description.strip()
+
+    print('additional_where_sql_list:', additional_where_sql_list)
+
+
+
+    # Top business donors
+    sql_query = """SELECT DISTINCT cand.*, race.race_description, party.party_name,
+    vc1.value AS total_amount, vc2.value AS total_in_district_amount, (vc2.value/vc1.value) AS percent_in_district, 
+    vc3.value AS count_donations, vc4.value AS count_donations_in_district, (vc4.value/vc3.value) AS percent_count_in_district 
+
+FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, party,
+    `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
+    `cache_value_amount` vc1, `cache_value_amount` vc2, `cache_value_amount` vc3, `cache_value_amount` vc4
+WHERE d.committee_id = comm.id
+    AND comm.id = cand_comm.committee_id
+    AND cand_comm.candidate_id = cand.id
+    AND cand.id = `candidacy`.candidate_id
+    AND `candidacy`.race_id = `race`.id
+    AND d.contributor_id = `contributor`.id
+    AND `contributor`.address_id = `contributor_address`.id
+    AND `contributor_address`.id = ad_set.address_id
+    AND ad_set.cicero_district_id = `cicero_district`.id
+    AND `candidacy`.party_id = party.id
+    AND `race`.race_name = '{}'
+    AND `cicero_district`.district_type = '{}'
+    AND `race`.race_district = `cicero_district`.district_id
+    AND comm.id = vc1.object_id AND vc1.object_name = 'committee' 
+    AND vc1.breakdown_1 = 'donations_by_year' AND vc1.breakdown_2 = 'total'
+    AND comm.id = vc2.object_id AND vc2.object_name = 'committee' 
+    AND vc2.breakdown_1 = 'in_district_donations_by_year' AND vc2.breakdown_2 = 'total'
+
+    AND comm.id = vc3.object_id AND vc3.object_name = 'committee' 
+    AND vc3.breakdown_1 = 'count_donations_by_year' AND vc3.breakdown_2 = 'total'
+
+    AND comm.id = vc4.object_id AND vc4.object_name = 'committee' 
+    AND vc4.breakdown_1 = 'in_district_count_donations_by_year' AND vc4.breakdown_2 = 'total'
+
+    AND {}
+    ORDER BY percent_in_district DESC""".format(race_race_name, cicero_district_type, ' AND '.join(additional_where_sql_list))
+
+    #print(sql_query); return
+
+    results = db_session.execute(sql_query)
+
+    candidates_in_district_percent = [dict(r) for r in results]
+
+    total_amounts = []
+    in_district_amounts = []
+    count_donations = []
+    count_donations_in_district = []
+
+    """
+    in_pa_amounts = []
+    count_donations_in_pa = []
+    """
+
+
+    for c in candidates_in_district_percent:
+        c['total_amount'] = round(float(c['total_amount']), 2)
+        c['count_donations'] = int(c['count_donations'])
+        c['avg_donation'] = round(c['total_amount']/c['count_donations'], 2)
+
+        c['total_in_district_amount'] = round(float(c['total_in_district_amount']), 2)
+        c['percent_in_district'] = float(100 * c['percent_in_district'])
+
+        c['count_donations_in_district'] = int(c['count_donations_in_district'])
+        c['percent_count_in_district'] = float(100 * c['percent_count_in_district'])
+
+        c['avg_in_district_donation'] = round(c['total_in_district_amount']/c['count_donations_in_district'], 2)
+
+        """
+        c['total_in_pa_amount'] = round(float(c['total_in_pa_amount']), 2)
+        c['percent_in_pa'] = float(100 * c['percent_in_pa'])
+
+        c['count_donations_in_pa'] = int(c['count_donations_in_pa'])
+        c['percent_count_in_pa'] = float(100 * c['percent_count_in_pa'])
+
+        c['avg_in_pa_donation'] = round(c['total_in_pa_amount']/c['count_donations_in_pa'], 2)
+        """
+
+
+        total_amounts.append(c['total_amount'])
+        in_district_amounts.append(c['total_in_district_amount'])
+        count_donations.append(c['count_donations'])
+        count_donations_in_district.append(c['count_donations_in_district'])
+
+        """
+        in_pa_amounts.append(c['total_in_pa_amount'])
+        count_donations_in_pa.append(c['count_donations_in_pa'])
+        """
+
+
+    # "${:,.2f}".format(value).
+
+    avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
+    avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
+    avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
+
+    avg_donation = "${:,.2f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
+    avg_in_district_donation = "${:,.2f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
+
+    median_amount = "${:,.2f}".format(my_median(total_amounts))
+    median_in_dist_amount = "${:,.2f}".format(my_median(in_district_amounts))
+
+    percent_count_in_district = "{:,.2f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_district = "{:,.2f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
+
+    # Include in PA
+    """
+    avg_in_pa_amount = "${:,.2f}".format(round(sum(in_pa_amounts)/len(in_pa_amounts), 2))
+    avg_count_of_in_pa_donations = "{:,.2f}".format(round(sum(count_donations_in_pa)/len(count_donations_in_pa), 2))
+    avg_in_pa_donation = "${:,.2f}".format(round((sum(in_pa_amounts)/len(in_pa_amounts))/(sum(count_donations_in_pa)/len(count_donations_in_pa)), 2))
+    median_in_pa_amount = "${:,.2f}".format(my_median(in_pa_amounts))
+    percent_count_in_pa = "{:,.2f}".format(round(100 * (sum(count_donations_in_pa)/len(count_donations_in_pa))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_pa = "{:,.2f}".format(round(100 * (sum(in_pa_amounts)/len(in_pa_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
+    """
+
+
+    #print(candidates_in_district_percent)
+
+    #districts = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]
+
+    if session['filter']['look_at'] == 'overall':
+        template_name = 'table_overall.html'
+    elif session['filter']['look_at'] == 'in_district':
+        template_name = 'table_in_district.html'
+    elif session['filter']['look_at'] == 'in_pa':
+        template_name = 'table_in_pa.html'
+
+    """
+    ,
+        avg_in_pa_amount=avg_in_pa_amount, avg_count_of_in_pa_donations=avg_count_of_in_pa_donations, avg_in_pa_donation=avg_in_pa_donation,
+        median_in_pa_amount=median_in_pa_amount, percent_count_in_pa=percent_count_in_pa, percent_amount_in_pa=percent_amount_in_pa
+    """
+
+    return render_template(template_name, candidates_in_district_percent=candidates_in_district_percent,
+        action_url=action_url, candidate_type=candidate_type, description=description, avg_amount=avg_amount, 
+        avg_in_dist_amount=avg_in_dist_amount, median_amount=median_amount, median_in_dist_amount=median_in_dist_amount,
+        avg_count_of_donations=avg_count_of_donations, avg_count_of_in_district_donations=avg_count_of_in_district_donations,
+        avg_donation=avg_donation, avg_in_district_donation=avg_in_district_donation, districts=districts, 
+        percent_count_in_district=percent_count_in_district, percent_amount_in_district=percent_amount_in_district)
+
+
+
+
 @views.route('/state_house_in_district', methods=['GET'])
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def state_house_in_district():
 
-    # Top business donors
-    sql_query = """SELECT DISTINCT cand.*, race.race_description, party.party_name,
-    vc1.value AS total_amount, vc2.value AS in_district_amount, (vc2.value/vc1.value) AS percent_in_district
+    districts = [i for i in range(1, 203)]
+
+    #AND `race`.race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY'
+    #AND `cicero_district`.district_type = 'STATE_LOWER'
+
+    return donation_table(candidate_type='State House', race_race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY',
+        cicero_district_type = 'STATE_LOWER', districts=districts, action_url='/state_house_in_district')
+
+
+@views.route('/state_senate_in_district', methods=['GET'])
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def state_senate_in_district():
+
+    districts = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]
+
+    #AND `race`.race_name = 'SENATOR IN THE GENERAL ASSEMBLY'
+    #AND `cicero_district`.district_type = 'STATE_UPPER'
+
+    return donation_table(candidate_type='State Senate', race_race_name = 'SENATOR IN THE GENERAL ASSEMBLY',
+        cicero_district_type = 'STATE_UPPER',  districts=districts, action_url='/state_senate_in_district')
+
+
+"""
+@views.route('/state_house_in_district', methods=['GET'])
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def state_house_in_district():
+
+    additional_where_sql_list = ['1']
+
+    description = 'Basic stats for PARTY candidates running for the PA State House NUM_CANDS DISTRCT'
+
+    if session['filter']['party'] > 0:
+        additional_where_sql_list.append('`candidacy`.party_id = {}'.format(session['filter']['party']))
+        party = db_session.query(Party).get(session['filter']['party'])
+        description = description.replace('PARTY', party.party_name)
+    else:
+        description = description.replace('PARTY', 'all')
+
+    if session['filter']['min_total']:
+        additional_where_sql_list.append('d.party_id = {}'.format(session['filter']['min_total']))
+
+    if session['filter']['max_total']:
+        additional_where_sql_list.append('d.party_id = {}'.format(session['filter']['max_total']))
+
+    if session['filter']['num_candidates'] > 0:
+        additional_where_sql_list.append('`race`.num_candidates = {}'.format(session['filter']['num_candidates']))
+        if session['filter']['num_candidates'] == 1:
+            description = description.replace('NUM_CANDS', 'where only one candidate is running')
+        else:
+            description = description.replace('NUM_CANDS', 'where {} candidates are running'.format(session['filter']['num_candidates']))
+    else:
+        description = description.replace('NUM_CANDS', '')
+
+    if session['filter']['district'] > 0:
+        additional_where_sql_list.append('`race`.race_district = {}'.format(session['filter']['district']))
+        description = description.replace('DISTRCT', 'in district number {}'.format(session['filter']['district']))
+
+    else:
+        description = description.replace('DISTRCT', '')
+
+    description = description.strip().replace('  ', ' ')
+
+    print('additional_where_sql_list:', additional_where_sql_list)
+
+
+    #sql_query = ""SELECT DISTINCT cand.*, race.race_description, party.party_name,
+    vc1.value AS total_amount, vc2.value AS total_in_district_amount, (vc2.value/vc1.value) AS percent_in_district, 
+    vc3.value AS count_donations, vc4.value AS count_donations_in_district, (vc4.value/vc3.value) AS percent_count_in_district 
 FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, party,
     `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
-    `cache_value_amount` vc1, `cache_value_amount` vc2
+    `cache_value_amount` vc1, `cache_value_amount` vc2, `cache_value_amount` vc3, `cache_value_amount` vc4
 WHERE d.committee_id = comm.id
     AND comm.id = cand_comm.committee_id
     AND cand_comm.candidate_id = cand.id
@@ -186,30 +533,72 @@ WHERE d.committee_id = comm.id
     AND vc1.breakdown_1 = 'donations_by_year' AND vc1.breakdown_2 = 'total'
     AND comm.id = vc2.object_id AND vc2.object_name = 'committee' 
     AND vc2.breakdown_1 = 'in_district_donations_by_year' AND vc2.breakdown_2 = 'total'
-ORDER BY percent_in_district DESC"""
+
+    AND comm.id = vc3.object_id AND vc3.object_name = 'committee' 
+    AND vc3.breakdown_1 = 'count_donations_by_year' AND vc3.breakdown_2 = 'total'
+
+    AND comm.id = vc4.object_id AND vc4.object_name = 'committee' 
+    AND vc4.breakdown_1 = 'in_district_count_donations_by_year' AND vc4.breakdown_2 = 'total'
+
+    AND {}
+    #ORDER BY percent_in_district DESC"".format(' AND '.join(additional_where_sql_list))
+
+    print(sql_query)
 
     results = db_session.execute(sql_query)
 
     candidates_in_district_percent = [dict(r) for r in results]
 
+    total_amounts = []
+    in_district_amounts = []
+    count_donations = []
+    count_donations_in_district = []
+
     for c in candidates_in_district_percent:
         c['total_amount'] = round(float(c['total_amount']), 2)
-        c['in_district_amount'] = round(float(c['in_district_amount']), 2)
+        c['total_in_district_amount'] = round(float(c['total_in_district_amount']), 2)
         c['percent_in_district'] = float(100 * c['percent_in_district'])
 
-    print(candidates_in_district_percent)
+        c['count_donations'] = int(c['count_donations'])
+        c['count_donations_in_district'] = int(c['count_donations_in_district'])
+        c['percent_count_in_district'] = float(100 * c['percent_count_in_district'])
 
-    """    
-    result_dict = {} 
+        c['avg_donation'] = round(c['total_amount']/c['count_donations'], 2)
+        c['avg_in_district_donation'] = round(c['total_in_district_amount']/c['count_donations_in_district'], 2)
 
-    for r in results:
-        print(r)
-        result_dict[r.district_id] = {'district': r.district_id, 'donation_amount': round(float(r.district_amount), 2)}
-   
-    """
+        total_amounts.append(c['total_amount'])
+        in_district_amounts.append(c['total_in_district_amount'])
+        count_donations.append(c['count_donations'])
+        count_donations_in_district.append(c['count_donations_in_district'])
+
+    # "${:,.2f}".format(value).
+
+    avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
+    avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
+    avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
+
+    avg_donation = "${:,.2f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
+    avg_in_district_donation = "${:,.2f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
+
+    median_amount = "${:,.2f}".format(my_median(total_amounts))
+    median_in_dist_amount = "${:,.2f}".format(my_median(in_district_amounts))
+
+    percent_count_in_district = "{:,.2f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_district = "{:,.2f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
 
 
-    return render_template('state_house_in_district.html', candidates_in_district_percent=candidates_in_district_percent)
+    #print(candidates_in_district_percent)
+
+    districts = [i for i in range(1, 203)]
+
+
+    return render_template('table_in_district.html', candidates_in_district_percent=candidates_in_district_percent,
+        action_url='/state_house_in_district', candidate_type='State House', description=description, avg_amount=avg_amount, 
+        avg_in_dist_amount=avg_in_dist_amount, median_amount=median_amount, median_in_dist_amount=median_in_dist_amount,
+        avg_count_of_donations=avg_count_of_donations, avg_count_of_in_district_donations=avg_count_of_in_district_donations,
+        avg_donation=avg_donation, avg_in_district_donation=avg_in_district_donation, districts=districts, 
+        percent_count_in_district=percent_count_in_district, percent_amount_in_district=percent_amount_in_district)
 
 
 
@@ -217,12 +606,52 @@ ORDER BY percent_in_district DESC"""
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def state_senate_in_district():
 
+    additional_where_sql_list = ['1']
+
+    description = 'Basic stats for PARTY candidates running for the PA State Senate NUM_CANDS'
+
+    if session['filter']['party'] > 0:
+        additional_where_sql_list.append('`candidacy`.party_id = {}'.format(session['filter']['party']))
+        party = db_session.query(Party).get(session['filter']['party'])
+        description = description.replace('PARTY', party.party_name)
+    else:
+        description = description.replace('PARTY', 'all')
+
+    if session['filter']['min_total']:
+        additional_where_sql_list.append('d.party_id = {}'.format(session['filter']['min_total']))
+
+    if session['filter']['max_total']:
+        additional_where_sql_list.append('d.party_id = {}'.format(session['filter']['max_total']))
+
+    if session['filter']['num_candidates'] > 0:
+        additional_where_sql_list.append('`race`.num_candidates = {}'.format(session['filter']['num_candidates']))
+        if session['filter']['num_candidates'] == 1:
+            description = description.replace('NUM_CANDS', 'where only one candidate is running')
+        else:
+            description = description.replace('NUM_CANDS', 'where {} candidates are running'.format(session['filter']['num_candidates']))
+    else:
+        description = description.replace('NUM_CANDS', '')
+
+    if session['filter']['district'] > 0:
+        additional_where_sql_list.append('`race`.race_district = {}'.format(session['filter']['district']))
+        description = description.replace('DISTRCT', 'in district number {}'.format(session['filter']['district']))
+
+    else:
+        description = description.replace('DISTRCT', '')
+
+    description = description.strip()
+
+    print('additional_where_sql_list:', additional_where_sql_list)
+
+
+
     # Top business donors
-    sql_query = """SELECT DISTINCT cand.*, race.race_description, party.party_name,
-    vc1.value AS total_amount, vc2.value AS in_district_amount, (vc2.value/vc1.value) AS percent_in_district
+    #sql_query = ""SELECT DISTINCT cand.*, race.race_description, party.party_name,
+    vc1.value AS total_amount, vc2.value AS total_in_district_amount, (vc2.value/vc1.value) AS percent_in_district, 
+    vc3.value AS count_donations, vc4.value AS count_donations_in_district, (vc4.value/vc3.value) AS percent_count_in_district 
 FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, party,
     `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
-    `cache_value_amount` vc1, `cache_value_amount` vc2
+    `cache_value_amount` vc1, `cache_value_amount` vc2, `cache_value_amount` vc3, `cache_value_amount` vc4
 WHERE d.committee_id = comm.id
     AND comm.id = cand_comm.committee_id
     AND cand_comm.candidate_id = cand.id
@@ -240,28 +669,70 @@ WHERE d.committee_id = comm.id
     AND vc1.breakdown_1 = 'donations_by_year' AND vc1.breakdown_2 = 'total'
     AND comm.id = vc2.object_id AND vc2.object_name = 'committee' 
     AND vc2.breakdown_1 = 'in_district_donations_by_year' AND vc2.breakdown_2 = 'total'
-ORDER BY percent_in_district DESC"""
+
+    AND comm.id = vc3.object_id AND vc3.object_name = 'committee' 
+    AND vc3.breakdown_1 = 'count_donations_by_year' AND vc3.breakdown_2 = 'total'
+
+    AND comm.id = vc4.object_id AND vc4.object_name = 'committee' 
+    AND vc4.breakdown_1 = 'in_district_count_donations_by_year' AND vc4.breakdown_2 = 'total'
+
+    AND {}
+    #ORDER BY percent_in_district DESC"".format(' AND '.join(additional_where_sql_list))
+
 
     results = db_session.execute(sql_query)
 
     candidates_in_district_percent = [dict(r) for r in results]
 
+    total_amounts = []
+    in_district_amounts = []
+    count_donations = []
+    count_donations_in_district = []
+
     for c in candidates_in_district_percent:
         c['total_amount'] = round(float(c['total_amount']), 2)
-        c['in_district_amount'] = round(float(c['in_district_amount']), 2)
+        c['total_in_district_amount'] = round(float(c['total_in_district_amount']), 2)
         c['percent_in_district'] = float(100 * c['percent_in_district'])
 
-    print(candidates_in_district_percent)
+        c['count_donations'] = int(c['count_donations'])
+        c['count_donations_in_district'] = int(c['count_donations_in_district'])
+        c['percent_count_in_district'] = float(100 * c['percent_count_in_district'])
 
-    """    
-    result_dict = {} 
+        c['avg_donation'] = round(c['total_amount']/c['count_donations'], 2)
+        c['avg_in_district_donation'] = round(c['total_in_district_amount']/c['count_donations_in_district'], 2)
 
-    for r in results:
-        print(r)
-        result_dict[r.district_id] = {'district': r.district_id, 'donation_amount': round(float(r.district_amount), 2)}
-   
-    """
+        total_amounts.append(c['total_amount'])
+        in_district_amounts.append(c['total_in_district_amount'])
+        count_donations.append(c['count_donations'])
+        count_donations_in_district.append(c['count_donations_in_district'])
+
+    # "${:,.2f}".format(value).
+
+    avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
+    avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
+    avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
+
+    avg_donation = "${:,.2f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
+    avg_in_district_donation = "${:,.2f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
+
+    median_amount = "${:,.2f}".format(my_median(total_amounts))
+    median_in_dist_amount = "${:,.2f}".format(my_median(in_district_amounts))
+
+    percent_count_in_district = "{:,.2f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_district = "{:,.2f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
 
 
-    return render_template('state_senate_in_district.html', candidates_in_district_percent=candidates_in_district_percent)
+    #print(candidates_in_district_percent)
 
+    districts = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]
+
+
+    return render_template('table_in_district.html', candidates_in_district_percent=candidates_in_district_percent,
+        action_url='/state_senate_in_district', candidate_type='State Senate', description=description, avg_amount=avg_amount, 
+        avg_in_dist_amount=avg_in_dist_amount, median_amount=median_amount, median_in_dist_amount=median_in_dist_amount,
+        avg_count_of_donations=avg_count_of_donations, avg_count_of_in_district_donations=avg_count_of_in_district_donations,
+        avg_donation=avg_donation, avg_in_district_donation=avg_in_district_donation, districts=districts, 
+        percent_count_in_district=percent_count_in_district, percent_amount_in_district=percent_amount_in_district)
+
+"""
