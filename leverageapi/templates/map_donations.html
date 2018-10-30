@@ -112,7 +112,7 @@
         //    '<b>' + props.donation_amount + ' from a population of ' + props.population + ' for ' + props.pv_per_100000 + ' donation_amount per 100,000 in ' + props.name + '</b><br />'
         //    : 'Hover over a state');
         this._div.innerHTML = '<h4>Donations by {{ hover_description }}</h4>' +  (props ?
-            '<b>' + props.donation_amount + ' donated in {{ hover_description }} ' + props[property_name] + '</b><br />'
+            '<b>$' + props.donation_amount + ' donated in {{ hover_description }} ' + props[property_name] + '</b><br />'
             : 'Hover over a district');    };
 
     info.addTo(zipcode_map);
