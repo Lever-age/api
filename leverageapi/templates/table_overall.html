@@ -31,7 +31,8 @@
                 "render": function ( data, type, row ) {
                     //return '$'+data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     return '$'+formatMoney(data).replace(".00", "");
-                    //return '$'+data                },
+                    //return '$'+data
+                },
                 "targets": [ 4, 5 ]
             }
         ]
