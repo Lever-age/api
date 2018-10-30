@@ -103,7 +103,11 @@ def donations_by_state_house_district(committee_id):
     api_url='/api/donations_by_state_house_district/{}'.format(committee_id)
     property_name = 'District_1'
 
-    return render_template('map_donations.html', boundary_json=boundary_json, api_url=api_url, property_name=property_name)
+    commitee = db_session.query(Committee).get(committee_id)
+    candidate_name = commitee.candidates[0].name_first + ' ' + commitee.candidates[0].name_last
+
+    return render_template('map_donations.html', boundary_json=boundary_json, api_url=api_url, property_name=property_name,
+        hover_description='state house district', map_title='Map of donations to {} by PA State House District'.format(candidate_name))
 
 
 @views.route('/donations_by_state_senate_district/<committee_id>', methods=['GET'])
@@ -114,7 +118,11 @@ def donations_by_state_senate_district(committee_id):
     api_url='/api/donations_by_state_senate_district/{}'.format(committee_id)
     property_name = 'District_1'
 
-    return render_template('map_donations.html', boundary_json=boundary_json, api_url=api_url, property_name=property_name)
+    commitee = db_session.query(Committee).get(committee_id)
+    candidate_name = commitee.candidates[0].name_first + ' ' + commitee.candidates[0].name_last
+
+    return render_template('map_donations.html', boundary_json=boundary_json, api_url=api_url, property_name=property_name,
+        hover_description='state senate district', map_title='Map of donations to {} by PA State Senate District'.format(candidate_name))
 
 
 @views.route('/donations_by_zipcode/<committee_id>', methods=['GET'])
@@ -125,7 +133,11 @@ def donations_by_zipcode(committee_id):
     api_url='/api/donations_by_zipcode/{}'.format(committee_id)
     property_name = 'ZCTA5CE10'
 
-    return render_template('map_donations.html', boundary_json=boundary_json, api_url=api_url, property_name=property_name)
+    commitee = db_session.query(Committee).get(committee_id)
+    candidate_name = commitee.candidates[0].name_first + ' ' + commitee.candidates[0].name_last
+
+    return render_template('map_donations.html', boundary_json=boundary_json, api_url=api_url, property_name=property_name,
+        hover_description='zipcode', map_title='Map of donations to {} by zipcode'.format(candidate_name))
 
 
 
@@ -259,11 +271,11 @@ WHERE d.committee_id = comm.id
     ORDER BY percent_in_district DESC"".format(race_race_name, cicero_district_type, ' AND '.join(additional_where_sql_list))
 """
 
-def donation_table(candidate_type, race_race_name, cicero_district_type, districts, action_url):
+def donation_table(candidate_type, race_race_name, cicero_district_type, districts, action_url, map_url):
 
     additional_where_sql_list = ['1']
 
-    description = 'Basic stats for PARTY candidates running for the PA State Senate NUM_CANDS'
+    description = 'Basic stats for PARTY candidates running for the PA {} NUM_CANDS'.format(candidate_type)
 
     if session['filter']['party'] > 0:
         additional_where_sql_list.append('`candidacy`.party_id = {}'.format(session['filter']['party']))
@@ -301,26 +313,21 @@ def donation_table(candidate_type, race_race_name, cicero_district_type, distric
 
 
     # Top business donors
-    sql_query = """SELECT DISTINCT cand.*, race.race_description, party.party_name,
+    sql_query = """SELECT DISTINCT cand.*, comm.id AS 'committee_id', race.race_description, party.party_name,
     vc1.value AS total_amount, vc2.value AS total_in_district_amount, (vc2.value/vc1.value) AS percent_in_district, 
     vc3.value AS count_donations, vc4.value AS count_donations_in_district, (vc4.value/vc3.value) AS percent_count_in_district 
 
 FROM political_donation d, committee comm, `candidate_committees` cand_comm, `candidate` cand, `candidacy`, `race`, party,
-    `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
     `cache_value_amount` vc1, `cache_value_amount` vc2, `cache_value_amount` vc3, `cache_value_amount` vc4
 WHERE d.committee_id = comm.id
     AND comm.id = cand_comm.committee_id
     AND cand_comm.candidate_id = cand.id
     AND cand.id = `candidacy`.candidate_id
     AND `candidacy`.race_id = `race`.id
-    AND d.contributor_id = `contributor`.id
-    AND `contributor`.address_id = `contributor_address`.id
-    AND `contributor_address`.id = ad_set.address_id
-    AND ad_set.cicero_district_id = `cicero_district`.id
+
     AND `candidacy`.party_id = party.id
     AND `race`.race_name = '{}'
-    AND `cicero_district`.district_type = '{}'
-    AND `race`.race_district = `cicero_district`.district_id
+
     AND comm.id = vc1.object_id AND vc1.object_name = 'committee' 
     AND vc1.breakdown_1 = 'donations_by_year' AND vc1.breakdown_2 = 'total'
     AND comm.id = vc2.object_id AND vc2.object_name = 'committee' 
@@ -333,7 +340,22 @@ WHERE d.committee_id = comm.id
     AND vc4.breakdown_1 = 'in_district_count_donations_by_year' AND vc4.breakdown_2 = 'total'
 
     AND {}
-    ORDER BY percent_in_district DESC""".format(race_race_name, cicero_district_type, ' AND '.join(additional_where_sql_list))
+    ORDER BY percent_in_district DESC""".format(race_race_name, ' AND '.join(additional_where_sql_list))
+
+    """
+    `contributor`, `contributor_address`, `contributor_address_cicero_district_set` ad_set, `cicero_district`, 
+
+    AND d.contributor_id = `contributor`.id
+    AND `contributor`.address_id = `contributor_address`.id
+    AND `contributor_address`.id = ad_set.address_id
+    AND ad_set.cicero_district_id = `cicero_district`.id
+
+    AND `cicero_district`.district_type = '{}'
+    AND `race`.race_district = `cicero_district`.district_id
+
+    ORDER BY percent_in_district DESC"".format(race_race_name, cicero_district_type, ' AND '.join(additional_where_sql_list))
+
+    """
 
     #print(sql_query); return
 
@@ -353,6 +375,13 @@ WHERE d.committee_id = comm.id
 
 
     for c in candidates_in_district_percent:
+
+        if not c['count_donations']:
+            c['count_donations'] = 0
+
+        if not c['count_donations_in_district']:
+            c['count_donations_in_district'] = 0
+
         c['total_amount'] = round(float(c['total_amount']), 2)
         c['count_donations'] = int(c['count_donations'])
         c['avg_donation'] = round(c['total_amount']/c['count_donations'], 2)
@@ -387,9 +416,14 @@ WHERE d.committee_id = comm.id
         """
 
 
+
     # "${:,.2f}".format(value).
 
-    avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    if len(total_amounts):
+        avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    else:
+        avg_amount = 0
+
     avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
     avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
     avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
@@ -432,7 +466,7 @@ WHERE d.committee_id = comm.id
     """
 
     return render_template(template_name, candidates_in_district_percent=candidates_in_district_percent,
-        action_url=action_url, candidate_type=candidate_type, description=description, avg_amount=avg_amount, 
+        action_url=action_url, map_url=map_url, candidate_type=candidate_type, description=description, avg_amount=avg_amount, 
         avg_in_dist_amount=avg_in_dist_amount, median_amount=median_amount, median_in_dist_amount=median_in_dist_amount,
         avg_count_of_donations=avg_count_of_donations, avg_count_of_in_district_donations=avg_count_of_in_district_donations,
         avg_donation=avg_donation, avg_in_district_donation=avg_in_district_donation, districts=districts, 
@@ -451,7 +485,8 @@ def state_house_in_district():
     #AND `cicero_district`.district_type = 'STATE_LOWER'
 
     return donation_table(candidate_type='State House', race_race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY',
-        cicero_district_type = 'STATE_LOWER', districts=districts, action_url='/state_house_in_district')
+        cicero_district_type = 'STATE_LOWER', districts=districts, action_url='/state_house_in_district',
+        map_url='.donations_by_state_house_district')
 
 
 @views.route('/state_senate_in_district', methods=['GET'])
@@ -464,7 +499,24 @@ def state_senate_in_district():
     #AND `cicero_district`.district_type = 'STATE_UPPER'
 
     return donation_table(candidate_type='State Senate', race_race_name = 'SENATOR IN THE GENERAL ASSEMBLY',
-        cicero_district_type = 'STATE_UPPER',  districts=districts, action_url='/state_senate_in_district')
+        cicero_district_type = 'STATE_UPPER',  districts=districts, action_url='/state_senate_in_district',
+        map_url='.donations_by_state_senate_district')
+
+
+
+
+
+@views.route('/governor_in_district', methods=['GET'])
+#@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
+def governor_in_district():
+
+    districts = []
+
+    #AND `race`.race_name = 'SENATOR IN THE GENERAL ASSEMBLY'
+    #AND `cicero_district`.district_type = 'STATE_UPPER'
+
+    return donation_table(candidate_type='Governor', race_race_name = 'GOVERNOR',
+        cicero_district_type = 'STATE_UPPER',  districts=districts, action_url='/governor_in_district')
 
 
 """

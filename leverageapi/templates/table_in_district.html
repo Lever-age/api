@@ -52,9 +52,11 @@
 
             <h2>{{ description }}:</h2>
 
+            <p>This table shows campaign donations reported by candidates between January 2017 and September 2018. If the candidate is not shown either they did not report any donations, or their political committee has not been linked to their name. You can click on the candidate's name to see a state-wide map of donations by district. </p>
+
             <p>On average, candidates received <b>{{ avg_count_of_donations }}</b> donations of <b>{{ avg_donation }}</b> each for an average total of <b>{{ avg_amount }}</b>. The median total donated is <b>{{ median_amount }}</b>.</p>
 
-            <p>Within their district, candidates received an average of <b>{{ avg_count_of_in_district_donations }}</b> donations of <b>{{ avg_in_district_donation }}</b> each for an average total of <b>{{ avg_in_dist_amount }}</b>. The median total donated in district is <b>{{ median_in_dist_amount }}</b>.</p>
+            <p>Within their district, candidates received an average of <b>{{ avg_count_of_in_district_donations }}</b> donations of <b>{{ avg_in_district_donation }}</b> each for an average total of <b>{{ avg_in_dist_amount }}</b>. The median total donated from the candidate's district is <b>{{ median_in_dist_amount }}</b>.</p>
 
             <p>This means the average percentage of donors who live in the candidate's district is <b>{{ percent_count_in_district }}%</b> and their donations accounted for <b>{{ percent_amount_in_district }}%</b> of the total amount donated.</p>
 
@@ -79,7 +81,7 @@
               <tbody>
 {% for c in candidates_in_district_percent %}
                   <tr>
-                      <td>{{ c['name_first'] }} {{ c['name_last'] }}</td>
+                      <td><a target="_blank" href="{{ url_for(map_url, committee_id=c['committee_id']) }}">{{ c['name_first'] }} {{ c['name_last'] }}</a></td>
                       <td>{{ c['district'] }}</td>
                       <td>{{ c['party_name'] }}</td>
                       <td style="text-align:right">{{ c['count_donations'] }}</td>
