@@ -30,8 +30,8 @@
             {
                 "render": function ( data, type, row ) {
                     //return '$'+data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    return '$'+formatMoney(data)
-                },
+                    //return '$'+formatMoney(data)
+                    return '$'+data                },
                 "targets": [ 4, 5, 8, 9 ]
             }
         ]
@@ -69,7 +69,7 @@
                       <th>District</th>
                       <th>Party</th>
                       <th>Num. Donations</th>
-                      <th>Total Donated</th>
+                      <th>Total Donations Received</th>
                       <th>Avg. Donation</th>
                       <th>Num. In-PA Donations</th>
                       <th>% of Donations from PA</th>

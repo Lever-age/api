@@ -382,17 +382,17 @@ WHERE d.committee_id = comm.id
         if not c['count_donations_in_district']:
             c['count_donations_in_district'] = 0
 
-        c['total_amount'] = round(float(c['total_amount']), 2)
+        c['total_amount'] = int(round(float(c['total_amount']), 2))
         c['count_donations'] = int(c['count_donations'])
-        c['avg_donation'] = round(c['total_amount']/c['count_donations'], 2)
+        c['avg_donation'] = int(round(c['total_amount']/c['count_donations'], 2))
 
-        c['total_in_district_amount'] = round(float(c['total_in_district_amount']), 2)
-        c['percent_in_district'] = float(100 * c['percent_in_district'])
+        c['total_in_district_amount'] = int(round(float(c['total_in_district_amount']), 2))
+        c['percent_in_district'] = int(float(100 * c['percent_in_district']))
 
         c['count_donations_in_district'] = int(c['count_donations_in_district'])
-        c['percent_count_in_district'] = float(100 * c['percent_count_in_district'])
+        c['percent_count_in_district'] = int(float(100 * c['percent_count_in_district']))
 
-        c['avg_in_district_donation'] = round(c['total_in_district_amount']/c['count_donations_in_district'], 2)
+        c['avg_in_district_donation'] = int(round(c['total_in_district_amount']/c['count_donations_in_district'], 2))
 
         """
         c['total_in_pa_amount'] = round(float(c['total_in_pa_amount']), 2)
@@ -417,34 +417,34 @@ WHERE d.committee_id = comm.id
 
 
 
-    # "${:,.2f}".format(value).
+    # "${:,.0f}".format(value).
 
     if len(total_amounts):
-        avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+        avg_amount = "${:,.0f}".format(round(sum(total_amounts)/len(total_amounts), 2))
     else:
         avg_amount = 0
 
-    avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
-    avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
-    avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
+    avg_in_dist_amount = "${:,.0f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
+    avg_count_of_donations = "{:,.0f}".format(round(sum(count_donations)/len(count_donations), 2))
+    avg_count_of_in_district_donations = "{:,.0f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
 
-    avg_donation = "${:,.2f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
-    avg_in_district_donation = "${:,.2f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
+    avg_donation = "${:,.0f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
+    avg_in_district_donation = "${:,.0f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
 
-    median_amount = "${:,.2f}".format(my_median(total_amounts))
-    median_in_dist_amount = "${:,.2f}".format(my_median(in_district_amounts))
+    median_amount = "${:,.0f}".format(my_median(total_amounts))
+    median_in_dist_amount = "${:,.0f}".format(my_median(in_district_amounts))
 
-    percent_count_in_district = "{:,.2f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
-    percent_amount_in_district = "{:,.2f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
+    percent_count_in_district = "{:,.0f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_district = "{:,.0f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
 
     # Include in PA
     """
-    avg_in_pa_amount = "${:,.2f}".format(round(sum(in_pa_amounts)/len(in_pa_amounts), 2))
-    avg_count_of_in_pa_donations = "{:,.2f}".format(round(sum(count_donations_in_pa)/len(count_donations_in_pa), 2))
-    avg_in_pa_donation = "${:,.2f}".format(round((sum(in_pa_amounts)/len(in_pa_amounts))/(sum(count_donations_in_pa)/len(count_donations_in_pa)), 2))
-    median_in_pa_amount = "${:,.2f}".format(my_median(in_pa_amounts))
-    percent_count_in_pa = "{:,.2f}".format(round(100 * (sum(count_donations_in_pa)/len(count_donations_in_pa))/(sum(count_donations)/len(count_donations)), 2))
-    percent_amount_in_pa = "{:,.2f}".format(round(100 * (sum(in_pa_amounts)/len(in_pa_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
+    avg_in_pa_amount = "${:,.0f}".format(round(sum(in_pa_amounts)/len(in_pa_amounts), 2))
+    avg_count_of_in_pa_donations = "{:,.0f}".format(round(sum(count_donations_in_pa)/len(count_donations_in_pa), 2))
+    avg_in_pa_donation = "${:,.0f}".format(round((sum(in_pa_amounts)/len(in_pa_amounts))/(sum(count_donations_in_pa)/len(count_donations_in_pa)), 2))
+    median_in_pa_amount = "${:,.0f}".format(my_median(in_pa_amounts))
+    percent_count_in_pa = "{:,.0f}".format(round(100 * (sum(count_donations_in_pa)/len(count_donations_in_pa))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_pa = "{:,.0f}".format(round(100 * (sum(in_pa_amounts)/len(in_pa_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
     """
 
 
@@ -623,21 +623,21 @@ WHERE d.committee_id = comm.id
         count_donations.append(c['count_donations'])
         count_donations_in_district.append(c['count_donations_in_district'])
 
-    # "${:,.2f}".format(value).
+    # "${:,.0f}".format(value).
 
-    avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
-    avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
-    avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
-    avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
+    avg_amount = "${:,.0f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    avg_in_dist_amount = "${:,.0f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
+    avg_count_of_donations = "{:,.0f}".format(round(sum(count_donations)/len(count_donations), 2))
+    avg_count_of_in_district_donations = "{:,.0f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
 
-    avg_donation = "${:,.2f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
-    avg_in_district_donation = "${:,.2f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
+    avg_donation = "${:,.0f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
+    avg_in_district_donation = "${:,.0f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
 
-    median_amount = "${:,.2f}".format(my_median(total_amounts))
-    median_in_dist_amount = "${:,.2f}".format(my_median(in_district_amounts))
+    median_amount = "${:,.0f}".format(my_median(total_amounts))
+    median_in_dist_amount = "${:,.0f}".format(my_median(in_district_amounts))
 
-    percent_count_in_district = "{:,.2f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
-    percent_amount_in_district = "{:,.2f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
+    percent_count_in_district = "{:,.0f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_district = "{:,.0f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
 
 
     #print(candidates_in_district_percent)
@@ -758,21 +758,21 @@ WHERE d.committee_id = comm.id
         count_donations.append(c['count_donations'])
         count_donations_in_district.append(c['count_donations_in_district'])
 
-    # "${:,.2f}".format(value).
+    # "${:,.0f}".format(value).
 
-    avg_amount = "${:,.2f}".format(round(sum(total_amounts)/len(total_amounts), 2))
-    avg_in_dist_amount = "${:,.2f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
-    avg_count_of_donations = "{:,.2f}".format(round(sum(count_donations)/len(count_donations), 2))
-    avg_count_of_in_district_donations = "{:,.2f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
+    avg_amount = "${:,.0f}".format(round(sum(total_amounts)/len(total_amounts), 2))
+    avg_in_dist_amount = "${:,.0f}".format(round(sum(in_district_amounts)/len(in_district_amounts), 2))
+    avg_count_of_donations = "{:,.0f}".format(round(sum(count_donations)/len(count_donations), 2))
+    avg_count_of_in_district_donations = "{:,.0f}".format(round(sum(count_donations_in_district)/len(count_donations_in_district), 2))
 
-    avg_donation = "${:,.2f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
-    avg_in_district_donation = "${:,.2f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
+    avg_donation = "${:,.0f}".format(round((sum(total_amounts)/len(total_amounts))/(sum(count_donations)/len(count_donations)), 2))
+    avg_in_district_donation = "${:,.0f}".format(round((sum(in_district_amounts)/len(in_district_amounts))/(sum(count_donations_in_district)/len(count_donations_in_district)), 2))
 
-    median_amount = "${:,.2f}".format(my_median(total_amounts))
-    median_in_dist_amount = "${:,.2f}".format(my_median(in_district_amounts))
+    median_amount = "${:,.0f}".format(my_median(total_amounts))
+    median_in_dist_amount = "${:,.0f}".format(my_median(in_district_amounts))
 
-    percent_count_in_district = "{:,.2f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
-    percent_amount_in_district = "{:,.2f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
+    percent_count_in_district = "{:,.0f}".format(round(100 * (sum(count_donations_in_district)/len(count_donations_in_district))/(sum(count_donations)/len(count_donations)), 2))
+    percent_amount_in_district = "{:,.0f}".format(round(100 * (sum(in_district_amounts)/len(in_district_amounts))/(sum(total_amounts)/len(total_amounts)), 2))
 
 
     #print(candidates_in_district_percent)
