@@ -30,8 +30,8 @@
             {
                 "render": function ( data, type, row ) {
                     //return '$'+data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    //return '$'+formatMoney(data)
-                    return '$'+data                },
+                    return '$'+formatMoney(data).replace(".00", "");
+                    //return '$'+data                },
                 "targets": [ 4, 5, 8, 9 ]
             }
         ]
@@ -84,12 +84,12 @@
                       <td><a href="{{ url_for(map_url, committee_id=c['committee_id']) }}">{{ c['name_first'] }} {{ c['name_last'] }}</a></td>
                       <td>{{ c['district'] }}</td>
                       <td>{{ c['party_name'] }}</td>
-                      <td style="text-align:right">{{ c['count_donations'] }}</td>
-                      <td style="text-align:right">{{ c['total_amount'] }}</td>
+                      <td>{{ c['count_donations'] }}</td>
+                      <td>{{ c['total_amount'] }}</td>
                       <td>{{ c['avg_donation'] }}</td>
-                      <td style="text-align:right">{{ c['count_donations_in_pa'] }}</td>
+                      <td>{{ c['count_donations_in_pa'] }}</td>
                       <td>{{ c['percent_count_in_pa'] }}</td>
-                      <td style="text-align:right">{{ c['total_in_pa_amount'] }}</td>
+                      <td>{{ c['total_in_pa_amount'] }}</td>
                       <td>{{ c['avg_in_pa_donation'] }}</td>
                       <td>{{ c['percent_in_pa'] }}</td>
                   </tr>{% endfor %}
