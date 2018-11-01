@@ -479,7 +479,9 @@ WHERE d.committee_id = comm.id
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def state_house_in_district():
 
-    districts = [i for i in range(1, 203)]
+    #districts = [i for i in range(1, 203)]
+
+    districts = [2, 3, 5, 7, 9, 10, 11, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 73, 74, 76, 77, 78, 79, 80, 81, 82, 84, 85, 86, 87, 88, 89, 91, 92, 94, 95, 96, 97, 98, 99, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 118, 119, 121, 122, 125, 127, 128, 129, 131, 132, 133, 134, 135, 138, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 160, 161, 162, 163, 164, 165, 166, 167, 168, 170, 171, 172, 175, 176, 177, 178, 181, 182, 183, 184, 188, 189, 192, 194, 195, 199, 200, 201, 202]
 
     #AND `race`.race_name = 'REPRESENTATIVE IN THE GENERAL ASSEMBLY'
     #AND `cicero_district`.district_type = 'STATE_LOWER'
@@ -493,7 +495,9 @@ def state_house_in_district():
 #@cache.cached(timeout=CACHE_TIMEOUT, key_prefix=make_cache_key)
 def state_senate_in_district():
 
-    districts = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]
+    #districts = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]
+
+    districts = [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 46, 48]
 
     #AND `race`.race_name = 'SENATOR IN THE GENERAL ASSEMBLY'
     #AND `cicero_district`.district_type = 'STATE_UPPER'
