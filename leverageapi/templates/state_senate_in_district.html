@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{# import 'macros_form.html' as form_macros #}
+
+{% block head_title %}Top State Senate Candidates by In-District Donations{% endblock %}
+
+{# block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock #}
+
+{% block extra_js %}
+<script>
+  // From: https://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-dollars-currency-string-in-javascript
+  function formatMoney(n, c, d, t) {
+    var c = isNaN(c = Math.abs(c)) ? 2 : c,
+      d = d == undefined ? "." : d,
+      t = t == undefined ? "," : t,
+      s = n < 0 ? "-" : "",
+      i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c))),
+      j = (j = i.length) > 3 ? j % 3 : 0;
+
+    return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+  };
+  $(document).ready(function() {
+      $('#in-district-donations').DataTable(
+      {
+        "order": [[ 5, "desc" ]],
+        "pageLength": 10,
+        "lengthMenu": [ 10, 25, 50 ],
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    //return '$'+data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    return '$'+formatMoney(data)
+                },
+                "targets": [ 3, 4 ]
+            }
+        ]
+      } 
+    );
+  } );
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+
+            <h1>Top State Senate Candidates by In-District Donations</h1>
+            <table id="in-district-donations" class="display" style="width:100%">
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>District</th>
+                      <th>Party</th>
+                      <th>In-District</th>
+                      <th>Total</th>
+                      <th>% In-Distrct</th>
+                  </tr>
+              </thead>
+              <tbody>
+{% for c in candidates_in_district_percent %}
+                  <tr>
+                      <td>{{ c['name_first'] }} {{ c['name_last'] }}</td>
+                      <td>{{ c['district'] }}</td>
+                      <td>{{ c['party_name'] }}</td>
+                      <td style="text-align:right">{{ c['in_district_amount'] }}</td>
+                      <td style="text-align:right">{{ c['total_amount'] }}</td>
+                      <td>{{ c['percent_in_district'] }}</td>
+                  </tr>{% endfor %}
+              </tbody>
+            </table>
+
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

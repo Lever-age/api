@@ -17,12 +17,13 @@
               <li>{{ key }}: {{ race[key] }}</li>{% endfor %}
             </ul>
 
-            <p>{{ api_url_race }}</p>
+            <p><a href="{{ api_url_race }}">{{ api_url_race }}</a></p>
 
             <h2>Candidates</h2>
             <ul>
 {% for candidate in candidates %}
-              <li><a href="{{ url_for('.candidate', candidate_slug=candidate['slug']) }}">{{ candidate['name_first'] }} {{ candidate['name_last'] }}</a></li>{% endfor %}
+              <li><a href="{{ url_for('.candidate', candidate_slug=candidate['slug']) }}">{{ candidate['name_first'] }} {{ candidate['name_last'] }}</a> -- Heatmap of donations by: 
+                  <a href="{{ url_for('.donations_by_state_senate_district', committee_id=candidate.committees[0]['id']) }}">Senate districts</a> / <a href="{{ url_for('.donations_by_state_house_district', committee_id=candidate.committees[0]['id']) }}">House districts</a> / <a href="{{ url_for('.donations_by_zipcode', committee_id=candidate.committees[0]['id']) }}">Zipcode</a></li>{% endfor %}
             </ul>
         </div>
       </div>

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% import 'macros_form.html' as form_macros %}
+
+{% block head_title %}Top {{ candidate_type }} Candidates by {{ session['filter']['look_at_display'] }} Donations{% endblock %}
+
+{# block copy_title %}<a href="{{ api_url }}">{{ api_url }}</a>{% endblock #}
+
+{% block extra_js %}
+<script>
+  // From: https://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-dollars-currency-string-in-javascript
+  function formatMoney(n, c, d, t) {
+    var c = isNaN(c = Math.abs(c)) ? 2 : c,
+      d = d == undefined ? "." : d,
+      t = t == undefined ? "," : t,
+      s = n < 0 ? "-" : "",
+      i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c))),
+      j = (j = i.length) > 3 ? j % 3 : 0;
+
+    return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+  };
+  $(document).ready(function() {
+      $('#in-district-donations').DataTable(
+      {
+        "order": [[ 7, "desc" ]],
+        "pageLength": 10,
+        "lengthMenu": [ 10, 25, 50, 100, 250 ],
+        "scrollX": true,
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    //return '$'+data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    return '$'+formatMoney(data).replace(".00", "");
+                    //return '$'+data
+                },
+                "targets": [ 4, 5, 8, 9 ]
+            }
+        ]
+      } 
+    );
+  } );
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+    {{ form_macros.in_district_form(action_url, districts ) }}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg">
+
+            <h2>{{ description }}:</h2>
+
+            <p>This table shows campaign donations reported by candidates between January 2017 and September 2018. <b><i>If the candidate is not shown either they did not report any donations, or their political committee has not been linked to their name.</i></b> You can click on the candidate's name to see a state-wide map of donations by district. </p>
+            
+            <p>On average, candidates received <b>{{ avg_count_of_donations }}</b> donations of <b>{{ avg_donation }}</b> each for an average total of <b>{{ avg_amount }}</b>. The median total donated is <b>{{ median_amount }}</b>.</p>
+
+            <p>Within PA, candidates received an average of <b>{{ avg_count_of_in_pa_donations }}</b> donations of <b>{{ avg_in_pa_donation }}</b> each for an average total of <b>{{ avg_in_pa_amount }}</b>. The median total donated from PA is <b>{{ median_in_pa_amount }}</b>.</p>
+
+            <p>This means the average percentage of donors who live in PA is <b>{{ percent_count_in_pa }}%</b> and their donations accounted for <b>{{ percent_amount_in_pa }}%</b> of the total amount donated.</p>
+
+            <h1>Top {{ candidate_type }} Candidates by {{ session['filter']['look_at_display'] }} Donations</h1>
+
+            <table id="in-district-donations" class="display" style="width:100%">
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>District</th>
+                      <th>Party</th>
+                      <th>Num. Donations</th>
+                      <th>Total Donations Received</th>
+                      <th>Avg. Donation</th>
+                      <th>Num. In-PA Donations</th>
+                      <th>% of Donations from PA</th>
+                      <th>Total Donated In-PA</th>
+                      <th>Avg. Donation In-PA</th>
+                      <th>% of Money Donated From PA</th>
+                  </tr>
+              </thead>
+              <tbody>
+{% for c in candidates_in_district_percent %}
+                  <tr>
+                      <td><a href="{{ url_for(map_url, committee_id=c['committee_id']) }}">{{ c['name_first'] }} {{ c['name_last'] }}</a></td>
+                      <td>{{ c['district'] }}</td>
+                      <td>{{ c['party_name'] }}</td>
+                      <td>{{ c['count_donations'] }}</td>
+                      <td>{{ c['total_amount'] }}</td>
+                      <td>{{ c['avg_donation'] }}</td>
+                      <td>{{ c['count_donations_in_pa'] }}</td>
+                      <td>{{ c['percent_count_in_pa'] }}</td>
+                      <td>{{ c['total_in_pa_amount'] }}</td>
+                      <td>{{ c['avg_in_pa_donation'] }}</td>
+                      <td>{{ c['percent_in_pa'] }}</td>
+                  </tr>{% endfor %}
+              </tbody>
+            </table>
+
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
